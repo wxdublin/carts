@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="com/wildcrest/j2textprinter/" kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/home/pennpanda/github/carts/carts-dev/src"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

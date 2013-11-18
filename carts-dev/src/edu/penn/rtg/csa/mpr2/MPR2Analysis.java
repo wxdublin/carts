@@ -81,6 +81,7 @@ public class MPR2Analysis {
 		String result = checkSchedulingAlgorithm(rootComponent);
 		if(!result.toUpperCase().contains("FAIL")){
 			rootComponent.doCSA(whichSchedTest, result);
+			result = "SUCCESS"; //compute succeed.
 		}else{
 			System.err.println("Only support gEDF and gDM and all component must be same sched. algorithm.");
 		}
