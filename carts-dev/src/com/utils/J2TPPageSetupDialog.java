@@ -423,7 +423,7 @@ public class J2TPPageSetupDialog extends javax.swing.JDialog {
 		// }}
 
 		JPanelAll.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-	}
+	}  
 
 	public J2TPPageSetupDialog(
 			com.wildcrest.j2textprinter.J2TextPrinter j2textprinter) {
@@ -488,7 +488,7 @@ public class J2TPPageSetupDialog extends javax.swing.JDialog {
 			JCheckBoxPrintableAreaCoordinates.setSelected(j2textprinter
 					.isPrintableAreaCoordinates());
 			JTextFieldNumberOfCopies.setText(Integer.toString(j2textprinter
-					.getNumberOfCopies()));
+					.getNumberOfCopies())); 
 			JCheckBoxCenteredHorizontally.setSelected(j2textprinter
 					.isCenteredHorizontally());
 			JCheckBoxCenteredVertically.setSelected(j2textprinter
@@ -648,17 +648,17 @@ public class J2TPPageSetupDialog extends javax.swing.JDialog {
 	// }}
 
 	com.wildcrest.j2textprinter.J2TextPrinter j2textprinter;
-	int rememberOrientationAtStart;
+	int rememberOrientationAtStart;  
 
 	class SymAction implements java.awt.event.ActionListener {
 		public void actionPerformed(java.awt.event.ActionEvent event) {
 			Object object = event.getSource();
-			if (object == JButtonCancel)
+			if (object == JButtonCancel) 
 				JButtonCancel_actionPerformed(event);
 			else if (object == JButtonOK)
 				JButtonOK_actionPerformed(event);
 		}
-	}
+	} 
 
 	void JButtonCancel_actionPerformed(java.awt.event.ActionEvent event) {
 		// to do: code goes here.

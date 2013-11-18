@@ -52,7 +52,7 @@ public class EDFSchedulability_periodic {
 		double minBandwidth = 100 * resPeriod;
 		double L = C.computeLCM(resPeriod);	
 		
-		if(2*L >= GlobalVariable.MAX_NUMBER || L <= 0){ //if lcm is too large to computable, return minBandwidth = 2.1 which is unschedualb.e
+		if(2*L >= GlobalVariable.MAX_NUMBER || L < 0){ //if lcm is too large to computable, return minBandwidth = 2.1 which is unschedualb.e
 			return GlobalVariable.BANDWIDTH_VALUE_UNSCHED;
 		}
 

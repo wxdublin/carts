@@ -13,7 +13,7 @@ import org.xml.sax.SAXException;
  * Parse the gEDF guest domain's tasks, and distribute them to different VCPUs, set different scheduler for it.
  */
 
-public class TransferGuestDomTo4Alg {
+public class TransferGuestDomTo4AlgNonHarmonic {
 	
 	private String inputFilename;
 	private String outputFilename;
@@ -33,15 +33,16 @@ public class TransferGuestDomTo4Alg {
 			System.out.println("test program");
 			String inputFileName = "./0-3.50.txt";
 			String outputFileName = "0-3.50-pEDF-in.xml";
-			TransferGuestDomTo4Alg transferObj = new TransferGuestDomTo4Alg(inputFileName, outputFileName);
+			TransferGuestDomTo4AlgNonHarmonic transferObj = new TransferGuestDomTo4AlgNonHarmonic(inputFileName, outputFileName);
 			transferObj.setAlg("pEDF");
 			transferObj.transfer();
 			System.exit(0);
 		}
 		
-		String rootDir = "./data/sched";
+		String inputRootDir = "./data/sched";
+		String outputRootDir = "./data/sched_nonharmonic";
 		String dists[] = {"heavy-bimodal", "heavy-uniform", "medium-bimodal", "medium-uniform", "light-bimodal", "light-uniform"};
-		double util_min = 0.10;
+		double util_min = 0.90;
 		double util_step = 0.20;
 		double util_max = 5.00;
 		double taskset_num = 25;
@@ -50,15 +51,20 @@ public class TransferGuestDomTo4Alg {
 		df.setMaximumFractionDigits(2);
 		String algs[] = {"pEDF", "pDM", "gEDF", "gDM"};
 		for(int i=0; i<dists.length; i++){
-			String dir = rootDir + "/" + dists[i] + "/" + "input";
-			for(double util = util_min; util < util_max; util+=util_step){
+			String inputDir = inputRootDir + "/" + dists[i] + "/" + "input";
+			String outputDir = outputRootDir + "/" + dists[i] + "/" + "input";
+ 			for(double util = util_min; util < util_max; util+=util_step){
 				for(int index=0; index < taskset_num; index++){
-					String inputFileName = dir + "/" + df.format(util) + "/" + index + "-" + df.format(util) + ".txt";
+					String inputFileName = inputDir + "/" + df.format(util) + "/" + index + "-" + df.format(util) + ".txt";
+					String outputUtilFolderName =  outputDir + "/" + df.format(util);
+					File outputUtilFolder = new File(outputUtilFolderName);
+					outputUtilFolder.mkdirs();
 					for(int algIndex =0; algIndex < algs.length; algIndex++ ){
-						String outputFileName = dir + "/" + df.format(util) + "/" + index + "-" + df.format(util) + "-" +algs[algIndex] + "-in.xml";	
-						TransferGuestDomTo4Alg transferObj = new TransferGuestDomTo4Alg(inputFileName, outputFileName);
+						String outputFileName = outputDir + "/" + df.format(util) + "/" + index + "-" + df.format(util) + "-" +algs[algIndex] + "-nonharmonic-in.xml";	
+						TransferGuestDomTo4AlgNonHarmonic transferObj = new TransferGuestDomTo4AlgNonHarmonic(inputFileName, outputFileName);
 						transferObj.setAlg(algs[algIndex]);
 						transferObj.transfer();
+						System.out.println("finish transfer domU's alg to 4 alg. Note: use pDM's Utilizatin Bound for parititon");
 					}
 					
 				} 
@@ -67,7 +73,7 @@ public class TransferGuestDomTo4Alg {
 	}
 	
 	
-	public TransferGuestDomTo4Alg(String inputFilename, String outputFilename) {
+	public TransferGuestDomTo4AlgNonHarmonic(String inputFilename, String outputFilename) {
 		super();
 		this.inputFilename = inputFilename;
 		this.outputFilename = outputFilename;
@@ -76,10 +82,10 @@ public class TransferGuestDomTo4Alg {
 		for(int i=0; i<this.domNum; i++){
 			this.doms.add(new Domain());
 		}
-		this.doms.get(0).setPeriod("256");
-		this.doms.get(1).setPeriod("128");
-		this.doms.get(2).setPeriod("64");
-		this.doms.get(3).setPeriod("32");
+		this.doms.get(0).setPeriod("226");
+		this.doms.get(1).setPeriod("250");
+		this.doms.get(2).setPeriod("84");
+		this.doms.get(3).setPeriod("125");
 	}
 	
 	public void transfer(){
@@ -119,12 +125,35 @@ public class TransferGuestDomTo4Alg {
 		}
 	}
 	
+	public boolean getIsFeasibleOnThisVCPU(VCPU currentVCPU, Task currentTask){
+		if(this.alg.equalsIgnoreCase("pEDF")){ //utilization bound is 1
+			if(currentVCPU.getUsedUtil() + currentTask.getExe()*1.0/currentTask.getPeriod() <= 1)
+				return true;
+			else 
+				return false;
+		}else if(this.alg.equalsIgnoreCase("pDM")){
+			double currentTotalUtil = currentVCPU.getUsedUtil() + currentTask.getExe()*1.0/currentTask.getPeriod();
+			int taskTotalNum = currentVCPU.getTaskset().size() + 1; //the number of tasks after packing
+			double utilizationBound = taskTotalNum * (Math.pow(2, 1.0/taskTotalNum) - 1);
+			if(currentTotalUtil <= utilizationBound)
+				return true;
+			else
+				return false;	
+		}else{
+			System.err.println("only support pEDF/pDM in getIsFeasibleOnThisVCPU()");
+			System.exit(1);
+		}
+		return true; //cannot reach
+	}
+	
 	public void distributeTasks(String binPack){
 		if(!binPack.equalsIgnoreCase("best-fit")){
 			System.err.println("Only support best fit");
 			System.exit(1);
 		}
-		
+		if(this.alg.equalsIgnoreCase("gEDF") || this.alg.equalsIgnoreCase("gDM")){
+			return;
+		}
 		for(int domIndex=0; domIndex<this.domNum; domIndex++){
 			Domain currentDom = this.doms.get(domIndex);
 			Vector<Task> taskset = this.doms.get(domIndex).getTaskset();
@@ -136,8 +165,9 @@ public class TransferGuestDomTo4Alg {
 				//find best vcpu to place the task onto
 				for(int vcpuIndex =0; vcpuIndex < currentDom.getVCPUs().size(); vcpuIndex++){
 					VCPU currentVCPU = currentDom.getVCPUs().get(vcpuIndex);
+					boolean isFeasibleOnThisVCPU = this.getIsFeasibleOnThisVCPU(currentVCPU, currentTask);
 					double currentRemainUtil = 1 - (currentVCPU.getUsedUtil() + currentTask.getExe()*1.0/currentTask.getPeriod());
-					if(currentRemainUtil >= 0 && currentRemainUtil < bestRemainUtil){
+					if(isFeasibleOnThisVCPU == true && currentRemainUtil < bestRemainUtil){
 						bestRemainUtil = currentRemainUtil;
 						bestVCPUIndex = vcpuIndex;
 					}
@@ -212,7 +242,7 @@ public class TransferGuestDomTo4Alg {
 			BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputFileName));
 			outputFile.write(str);
 			outputFile.close();
-			System.out.println(str);
+			//System.out.println(str);
 		}catch(Exception e){
 			e.printStackTrace();
 		}

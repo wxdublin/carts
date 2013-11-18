@@ -3,6 +3,7 @@ package edu.penn.rtg.experiment.tasksetgenerator;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
+
 import javax.xml.parsers.*;
 
 import org.w3c.dom.*;
@@ -24,7 +25,7 @@ import org.xml.sax.SAXException;
  *
  */
 
-public class TransferHypervisorTo4Alg {
+public class TransferHypervisorTo4AlgNonHarmonic {
 	
 	private String inputFilename;
 	private String outputFilename;
@@ -38,7 +39,7 @@ public class TransferHypervisorTo4Alg {
 	private String inputAlg;
 	private String outputAlg;
 	
-	public TransferHypervisorTo4Alg(String inputFilename, String outputFilename, String inputAlg, String outputAlg) {
+	public TransferHypervisorTo4AlgNonHarmonic(String inputFilename, String outputFilename, String inputAlg, String outputAlg) {
 		super();
 		this.inputFilename = inputFilename;
 		this.outputFilename = outputFilename;
@@ -234,11 +235,32 @@ public class TransferHypervisorTo4Alg {
 		}
 		
 	}
+	public boolean getIsFeasibleOnThisCore(CPU currentCore, VCPU currentVCPU, String outputAlg){
+		double vcpu_util = currentVCPU.getExe()*1.0/currentVCPU.getPeriod();
+		if(outputAlg.equalsIgnoreCase("pEDF")){ //utilization bound is 1
+			if(currentCore.getUsed_capacity() + vcpu_util <= 1)
+				return true;
+			else 
+				return false;
+		}else if(outputAlg.equalsIgnoreCase("pDM")){
+			double currentTotalUtil = currentCore.getUsed_capacity() + vcpu_util;
+			int vcpuTotalNum = currentCore.getVcpus().size() + 1; //the number of tasks after packing
+			double utilizationBound = vcpuTotalNum * (Math.pow(2, 1.0/vcpuTotalNum) - 1);
+			if(currentTotalUtil <= utilizationBound)
+				return true;
+			else
+				return false;	
+		}else{
+			System.err.println("only support pEDF/pDM in getIsFeasibleOnThisVCPU()");
+			System.exit(1);
+		}
+		return true; //cannot reach
+	}
 	
-	private boolean isFeasible(VCPU vcpu, CPU core){
-		double vcpu_util = vcpu.getExe()*1.0/vcpu.getPeriod();
+	private boolean isFeasible(VCPU vcpu, CPU core, String outputAlg){
 		
-		if(vcpu_util + core.getUsed_capacity() <= 1 &&
+		boolean isFeasibleOnThisCore = this.getIsFeasibleOnThisCore(core,vcpu, outputAlg);
+		if(isFeasibleOnThisCore == true &&
 				!core.hasDomiOnIt(vcpu.getDomAffinity())){//is Feasible
 			return true;
 		}else{
@@ -291,7 +313,7 @@ public class TransferHypervisorTo4Alg {
 		}
 	}
 	
-	private void distributeVCPUs2Cores(String partitionAlgorithm){
+	private void distributeVCPUs2Cores(String partitionAlgorithm, String outputAlg){ //outputAlg is pEDF/pDM
 		if(!partitionAlgorithm.equalsIgnoreCase("BEST-FIT")){
 			System.err.println("Only support Best-Fit now. exit(1)");
 			System.exit(1);
@@ -306,7 +328,7 @@ public class TransferHypervisorTo4Alg {
 				int bestCoreIndex = -1;
 				for(int coreIndex=0; coreIndex<this.coreNum; coreIndex++){
 					CPU currentCore = this.cpus.get(coreIndex);
-					if(isFeasible(currentVCPU, currentCore)){//check if a core is feasible for this vcpu
+					if(isFeasible(currentVCPU, currentCore,outputAlg)){//check if a core is feasible for this vcpu
 						double currentRemainCapacity = 1 - (currentCore.getUsed_capacity() + currentVCPU.getExe()*1.0/currentVCPU.getPeriod());
 						if(currentRemainCapacity < bestRemainCapacity){ //the core is current best core
 							bestRemainCapacity = currentRemainCapacity;
@@ -333,7 +355,7 @@ public class TransferHypervisorTo4Alg {
 	 */
 	public void writePartitionSchedInput(String outputFilename, String algorithm){
 		if(isVCPUDistributed == false){
-			distributeVCPUs2Cores("Best-Fit");
+			distributeVCPUs2Cores("Best-Fit", algorithm);
 		}
 		String str = "";
 		str += "<system os_scheduler=\"" + algorithm + "\" period=\"" + this.system_period + "\">" + "\r\n";
@@ -384,7 +406,7 @@ public class TransferHypervisorTo4Alg {
 		df.setMinimumFractionDigits(2);
 		df.setMaximumFractionDigits(2);
 		//String dists[] = {"heavy-bimodal","medium-bimodal","light-bimodal",
-		String dists[] = {"heavy-bimodal","medium-bimodal","light-bimodal"};
+		String dists[] = {"heavy-bimodal","medium-bimodal","light-bimodal","heavy-uniform","medium-uniform"};
 		String inputAlgs[] = {"gEDF","gDM", "pEDF", "pDM"};
 		String outputAlgs[] = {"gEDF","gDM", "pEDF", "pDM"};
 		for(int distIndex=0; distIndex < dists.length; distIndex++){
@@ -393,7 +415,7 @@ public class TransferHypervisorTo4Alg {
 				String inputAlg = inputAlgs[i];
 				for(int j=0; j<outputAlgs.length; j++){
 					String outputAlg = outputAlgs[j];
-					String topPath = "./data/sched/" + dist;
+					String topPath = "./data/sched_nonharmonic/" + dist;
 					for(double util= util_start; util<util_end; util+=util_step){
 						String wholeInputFolderPath = topPath + "/" + "input" + "/" + df.format(util);
 						String wholeOutputFolderPath = topPath + "/" + "output/" + outputAlg;
@@ -405,21 +427,20 @@ public class TransferHypervisorTo4Alg {
 						for(int tasksetIndex=0; tasksetIndex < tasksetNum; tasksetIndex++){
 							String inputFilename ="", outputFilename= "";
 							if(inputAlg.equalsIgnoreCase("gEDF") || inputAlg.equalsIgnoreCase("gDM")){
-								inputFilename = wholeInputFolderPath + "/" + tasksetIndex + "-" + df.format(util) + "-" + inputAlg + "-MPR2-out.xml";
+								inputFilename = wholeInputFolderPath + "/" + tasksetIndex + "-" + df.format(util) + "-" + inputAlg + "-MPR2-nonharmonic-out.xml";
 							}else{
-								inputFilename = wholeInputFolderPath + "/" + tasksetIndex + "-" + df.format(util) + "-" + inputAlg + "-PRM-out.xml";
+								inputFilename = wholeInputFolderPath + "/" + tasksetIndex + "-" + df.format(util) + "-" + inputAlg + "-PRM-nonharmonic-out.xml";
 							}
-							outputFilename = wholeOutputFolderPath + "/" + tasksetIndex + "-" + df.format(util) + "-" + inputAlg + "-" + outputAlg +"-vmm-in.xml";
+							outputFilename = wholeOutputFolderPath + "/" + tasksetIndex + "-" + df.format(util) + "-" + inputAlg + "-" + outputAlg +"-nonharmonic-vmm-in.xml";
 						
 							
-							TransferHypervisorTo4Alg reader = new TransferHypervisorTo4Alg(inputFilename, outputFilename, inputAlg, outputAlg);
+							TransferHypervisorTo4AlgNonHarmonic reader = new TransferHypervisorTo4AlgNonHarmonic(inputFilename, outputFilename, inputAlg, outputAlg);
 							reader.parseFile(inputAlg); //read input file's vcpu parameter to dom structure Vector<Vector<VCPU>>
 							if(outputAlg.equalsIgnoreCase("gEDF") || outputAlg.equalsIgnoreCase("gDM")){
 								reader.writeGlobalSchedInput(outputFilename, outputAlg);
 							}else if(outputAlg.equalsIgnoreCase("pEDF") || outputAlg.equalsIgnoreCase("pDM")){
 								reader.writePartitionSchedInput(outputFilename, outputAlg);
 							}
-							System.out.println("outputfile: " + outputFilename);
 							
 						}
 						
@@ -438,13 +459,13 @@ public class TransferHypervisorTo4Alg {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		  
+		
 		
 		double util_start = 0.90;
 		double util_step = 0.20;
 		double util_end = 5.00;
-		int tasksetNum = 5;//25;
-		TransferHypervisorTo4Alg.writeBatchOfSchedInput(util_start,util_step, util_end, tasksetNum); //passed the test
+		int tasksetNum = 25;//25;
+		TransferHypervisorTo4AlgNonHarmonic.writeBatchOfSchedInput(util_start,util_step, util_end, tasksetNum); //passed the test
 
 	}
 	

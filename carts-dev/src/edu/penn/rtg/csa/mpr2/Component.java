@@ -214,7 +214,7 @@ public class Component {
 	 */
 	public double checkThetaMonotonic(int whichSchedTest, String algorithm){
 		algorithm = "gEDF";
-		if(whichSchedTest == GlobalVariable.BERTOGNA_SCHEDTEST ){
+		if(whichSchedTest == GlobalVariable.MARKO_SCHEDTEST ){
 			System.err.println("whichSchedTest is Bertogna! CheckThetaMonotonic is only for Arvind test!");
 			System.exit(1);
 		}

@@ -26,6 +26,7 @@ public class MPR2Analysis {
 				run(args[0],args[1],args[2],whichSchedTest);
 			}else if(args.length >= 4){ // >= to make it easier in eclipse to debug.
 				int whichSchedTest = parseWhichSchedTest(args[3]);
+				System.out.println("Using " + args[3] + " sched test!");
 				run(args[0],args[1],args[2],whichSchedTest);
 			}
 			
@@ -56,7 +57,7 @@ public class MPR2Analysis {
 	
 	public static int parseWhichSchedTest(String str){
 		if(str.equalsIgnoreCase("ARVIND_SCHEDTEST")) return GlobalVariable.ARVIND_SCHEDTEST;
-		if(str.equalsIgnoreCase("BERTOGNA_SCHEDTEST")) return GlobalVariable.BERTOGNA_SCHEDTEST;
+		//if(str.equalsIgnoreCase("BERTOGNA_SCHEDTEST")) return GlobalVariable.BERTOGNA_SCHEDTEST; //avoid misunderstanding. only use MARKO_SCHEDTEST
 		if(str.equalsIgnoreCase("ARVIND_SCHEDTEST_FAST")) return GlobalVariable.ARVIND_SCHEDTEST_FAST;
 		if(str.equalsIgnoreCase("MENG_SCHEDTEST")) return GlobalVariable.MENG_SCHEDTEST;
 		if(str.equalsIgnoreCase("MARKO_SCHEDTEST")) return GlobalVariable.MARKO_SCHEDTEST;
