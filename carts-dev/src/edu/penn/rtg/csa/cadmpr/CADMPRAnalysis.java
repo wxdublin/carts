@@ -146,6 +146,7 @@ public class CADMPRAnalysis {
 		if (!(rootComponent.getSchedulingPolicy().equalsIgnoreCase("hEDF")
 				|| rootComponent.getSchedulingPolicy().equalsIgnoreCase("EDF") || rootComponent
 				.getSchedulingPolicy().equalsIgnoreCase("gEDF"))) {
+			System.err.println("ERROR: only support hEDF scheduling policy in each component with CADMPR model");
 			return "ERROR: only support hEDF scheduling policy in each component with CADMPR model";
 		}
 		for (Component component : rootComponent.getChildComponents()) {

@@ -660,7 +660,7 @@ public class Component {
 			double denominator = (Theta/Pi - U_tau);
 			AkMax = numerator/denominator;
 			
-			if(denominator < 0){//effective bandwidth < taskset util then LHS > RHS
+			if(denominator < 0 || denominator < GlobalVariable.MIN_DOUBLE){//effective bandwidth < taskset util then LHS > RHS
 				return GlobalVariable.InterfaceInfeasible;
 			}
 			if(whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST 
