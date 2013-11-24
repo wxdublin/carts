@@ -706,7 +706,7 @@ public class Component {
 			double denominator = (Theta_star/Pi) + Theta_prime*(m_prime-1)/Pi - U_tau ;
 			AkMax = numerator/denominator - workload.get(k).getDeadline();
 			
-			if(denominator < 0){//effective bandwidth < taskset util then LHS > RHS
+			if(denominator < 0 || denominator < GlobalVariable.MIN_DOUBLE){//effective bandwidth < taskset util then LHS > RHS
 				return GlobalVariable.InterfaceInfeasible;
 			}
 			if(whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST 

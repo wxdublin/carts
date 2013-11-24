@@ -485,7 +485,8 @@ public class Component {
 		
 		//Ak's maximum value. Theorem 2 in Arvind's paper.
 		AkMax = (C_sum + m_prime*workload.get(k).getExe() - workload.get(k).getDeadline()*(Theta/Pi - U_tau) + U + B_prime) / (Theta/Pi - U_tau);
-		if(Theta/Pi - U_tau < 0){
+		double denominator  = Theta/Pi - U_tau;
+		if(denominator <= GlobalVariable.MIN_DOUBLE ){
 			return GlobalVariable.InterfaceInfeasible;
 		}
 		if(whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST 
