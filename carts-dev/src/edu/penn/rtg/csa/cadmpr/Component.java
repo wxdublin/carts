@@ -81,6 +81,7 @@ public class Component {
 				this.childComponents.get(i).resetDelta_crpmd();
 			}
 		}
+		System.out.println("reset the crpmd as 1.9ms which is only for the experiment");
 		
 	}
 	
