@@ -491,6 +491,8 @@ public class Component {
 		}
 		if(whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST 
 				&& AkMax > GlobalVariable.AK_MAX_BOUND){
+			Tool.printLog("DMPR\t" + this.componentFilename + "\t Arvind_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! system exit. Not compute interface for this task set\r\n");
+
 			Tool.write2Aklog("DMPR\t" + this.componentFilename + "\t Arvind_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! system exit. Not compute interface for this task set\r\n");
 			System.err.println("DMPR\t" + this.componentFilename + "\t Arvind_SchedTest Ak_max(calculated)" + 
 					AkMax + " \t TOO LARGE! system exit. Not compute interface for this task set\r\n" +

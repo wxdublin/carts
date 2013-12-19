@@ -323,7 +323,9 @@ public class Component {
 					Tool.write2log("Component name=" + this.componentName  + "\tTheta_i=" + Theta_i + "\t k=" + k + "\t Ak_max=" + Ak_max);
 					for(double Ak = 0; Ak <= Ak_max; Ak += GlobalVariable.TIME_PRECISION){
 						double Dk = workload.get(k).getDeadline();
-						if(this.getDBF(Ak, Dk, m_prime_i, k) > currentInterface.getSBF_CADMPR(Ak+Dk, whichApproach, this)){
+						double dbf = this.getDBF(Ak, Dk, m_prime_i, k);
+						double sbf =  currentInterface.getSBF_CADMPR(Ak+Dk, whichApproach, this);
+						if(dbf > sbf){
 //							Tool.debug("Component " + this.componentName + " currentInterface (" + currentInterface.getPi() + ", " + 
 //									currentInterface.getTheta() + ", " + currentInterface.getM_prime() + ") \t" +  "check task " + k + "\t" + 
 //									"Ak+Dk:" + (Ak+Dk) + 

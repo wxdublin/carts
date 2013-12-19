@@ -3,6 +3,7 @@ package edu.penn.rtg.csa.cadmpr;
 import java.util.Vector;
 
 import edu.penn.rtg.common.GlobalVariable;
+import edu.penn.rtg.common.Tool;
 
 /**
  * Class CacheAware DMPR.
@@ -63,16 +64,16 @@ public class CADMPR {
 			double Theta_prime = Math.max(0, this.Pi - x2);
 			double y2 = Math.max(0, Math.floor((t-x2)/this.Pi));
 			
-			if(Theta_part != this.Pi){
+			if(this.Pi - Theta_part > GlobalVariable.MIN_DOUBLE ){
 				result_partialvp = y1*Theta_star + Math.max(0, t - x1 - y1*this.Pi - z);
 				result_fullvps = (this.m_prime - 1)*(y2*Theta_prime + Math.max(0, t - y2*this.Pi - 2*x2));
 				result = result_partialvp + result_fullvps;
 				return result;
-			}
-			if(Theta_part == this.Pi){
+			}else{
 				result_partialvp = t;
 				result_fullvps = (this.m_prime - 1)*t;
 				result = result_partialvp + result_fullvps;
+				Tool.printLog("(" + this.Pi + "," + this.Theta + "," + this.m_prime + ")No partial VCPU, so no vcpu-event related cache overhead in SBF");;
 				return result;
 			}
 					
