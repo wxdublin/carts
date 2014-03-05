@@ -30,7 +30,7 @@ public class GlobalVariable {
 	public static final int MENG_SCHEDTEST = 4;
 	public static final int MARKO_SCHEDTEST = 5;
 	
-	public static final double AK_MAX_BOUND = 1000 / TIME_PRECISION; // This is estimated according to Ak_max equation. We let denominator greater than 0.1. Becauset this is the time precision we used.
+	public static final double AK_MAX_BOUND = 100000 / TIME_PRECISION; // This is estimated according to Ak_max equation. We let denominator greater than 0.1. Becauset this is the time precision we used.
 	public static final int InterfaceInfeasible = -1;
 	
 	public static final int TASK = 1;
