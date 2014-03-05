@@ -34,6 +34,9 @@ public class CADMPRAnalysis {
 			if(args[1].equalsIgnoreCase("CAMPR2hEDF_TASKCENTRIC") || args[1].equalsIgnoreCase("CADMPR_TASKCENTRIC") ){
 				System.out.println("Using Task Centric overhead accounting technique");
 				run(args[0],args[1],args[2],GlobalVariable.TASK_CENTRIC, whichSchedTest);
+			}else if(args[1].equalsIgnoreCase("CAMPR2hEDF_TASKCENTRIC_UB") || args[1].equalsIgnoreCase("CADMPR_TASKCENTRIC_UB") ){
+				System.out.println("Using Task Centric Upper Bound overhead accounting technique");
+				run(args[0],args[1],args[2],GlobalVariable.TASK_CENTRIC_UB, whichSchedTest);
 			}else if(args[1].equalsIgnoreCase("CAMPR2hEDF_MODELCENTRIC") || args[1].equalsIgnoreCase("CADMPR_MODELCENTRIC")){
 				System.out.println("Using Model Centric overhead accounting technique");
 				run(args[0],args[1],args[2],GlobalVariable.MODEL_CENTRIC, whichSchedTest);
@@ -50,6 +53,7 @@ public class CADMPRAnalysis {
 		}
 	}
 	
+	/*Note: CADMPR only supports two level scheduling right now! Although it can run for multiple level scheduling, the result's correctness is not checked!*/
 	public static void run(String inputFilename, String resourceModel, String outputFilename,int whichApproach, int whichSchedTest ){
 
 		XMLInterpreter4CADMPR xmlInterpreter = new XMLInterpreter4CADMPR(inputFilename); //4 is short for "for"
@@ -63,6 +67,7 @@ public class CADMPRAnalysis {
 		
 		switch(whichApproach){
 		case GlobalVariable.TASK_CENTRIC: doCADMPRTaskCentricAnalysis(rootComponent, whichApproach, whichSchedTest); break;
+		case GlobalVariable.TASK_CENTRIC_UB: doCADMPRTaskCentricUBAnalysis(rootComponent, whichApproach, whichSchedTest); break;
 		case GlobalVariable.MODEL_CENTRIC: doCADMPRModelCentricAnalysis(rootComponent, whichApproach, whichSchedTest); break;
 		case GlobalVariable.HYBRID: rootComponent = doCADMPRHybridAnalysis(rootComponent, whichApproach, whichSchedTest); break;
 		default: System.err.println("No such overhead aware MPR analysis approach. Only suport TaskCentri and ModelCentric approach now. Exit(1)"); System.exit(1);
@@ -101,6 +106,21 @@ public class CADMPRAnalysis {
 		String result = checkSchedulingAlgorithm(rootComponent);
 		rootComponent.inflateTaskWCET_taskCentric();
 		rootComponent.doCSA(whichSchedTest, whichApproach);
+		return result;
+	}
+	
+	public static String doCADMPRTaskCentricUBAnalysis(Component rootComponent, int whichApproach, int whichSchedTest){
+		String result = checkSchedulingAlgorithm(rootComponent);
+		rootComponent.inflateTaskWCETEV1_Bjorn();
+		rootComponent.doCSA(whichSchedTest, GlobalVariable.TASK_CENTRIC);
+	
+		rootComponent.set_taskcentricUBOnly_interface_and_interfacetasks_for_all_leaf(); //set interface upper bound
+		//clear the dMPRInterface to performance task centric analysis again and compare with the interface upper bound calculated above
+		rootComponent.clear_cadmpr_interface_and_interfacetasks_for_all_nodes();
+		
+		rootComponent.inflateTaskWCET_onlyVCPUEvent();
+		rootComponent.doCSA(whichSchedTest, GlobalVariable.TASK_CENTRIC_UB); /*when compute leaf component, need compare with interface upper bound*/
+		
 		return result;
 	}
 	

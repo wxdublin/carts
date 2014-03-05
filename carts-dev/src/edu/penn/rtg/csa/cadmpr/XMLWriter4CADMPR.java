@@ -53,11 +53,12 @@ public class XMLWriter4CADMPR {
 		//We print out the interface as (Pi_hybrid, Theta_hybrid, m_prime_hybrid) to make it consistant with Insik's interface. 
 		//Actually, this interface implicitly indicate Pi_hybrid-1 dedicated cores because it fix the interface transformation
 		int m_prime_hybrid = component.getCacheAwareMPRInterface().getM_prime() + component.getCacheAwareMPRInterface().getM_dedicatedCores();
-		double Theta_hybrid = component.getCacheAwareMPRInterface().getTheta() + component.getCacheAwareMPRInterface().getPi()*component.getCacheAwareMPRInterface().getM_dedicatedCores();
+		double Theta_hybrid = component.getCacheAwareMPRInterface().getTheta() + component.getCacheAwareMPRInterface().getPi() * component.getCacheAwareMPRInterface().getM_dedicatedCores();
 		double Pi_hybrid = component.getCacheAwareMPRInterface().getPi();
 		String resourceModel = "";
 		switch(whichApproach){
 		case GlobalVariable.TASK_CENTRIC: resourceModel="CADMPR_TASKCENTRIC"; break;
+		case GlobalVariable.TASK_CENTRIC_UB: resourceModel="CADMPR_TASKCENTRIC_UB"; break;
 		case GlobalVariable.TASK_CENTRIC_BJORN: resourceModel = "CADMPR_TASKCENTRIC_BJORN"; break;
 		case GlobalVariable.MODEL_CENTRIC: resourceModel="CADMPR_MODELCENTRIC"; break;
 		case GlobalVariable.HYBRID: resourceModel = "CADMPR_HYBRID"; break;

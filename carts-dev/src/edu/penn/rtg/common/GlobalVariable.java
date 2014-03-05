@@ -3,7 +3,7 @@ package edu.penn.rtg.common;
 public class GlobalVariable {
 	public static final boolean hasGUI = false;
 	
-	public static final double TIME_PRECISION = 0.1; 
+	public static final double TIME_PRECISION = 1; 
 	public static final long MAX_INTEGER = 2047483647; //9223372036854775807;//largest number of long type in java. 32 bit
 	public static final long MAX_NUMBER = 2047483647; //2 * 10^10
 	public static final long MIN_INTEGER = 0;
@@ -21,6 +21,7 @@ public class GlobalVariable {
 	public static final int TASK_CENTRIC_BJORN = 2;
 	public static final int MODEL_CENTRIC = 3;
 	public static final int HYBRID = 4;
+	public static final int TASK_CENTRIC_UB = 5;
 	
 	//whichSchedTest
 	public static final int ARVIND_SCHEDTEST = 1;

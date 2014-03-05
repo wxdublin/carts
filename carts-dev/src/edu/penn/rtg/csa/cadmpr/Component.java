@@ -22,8 +22,10 @@ public class Component {
 	private String schedulingPolicy;
 	private Vector<Task> taskset;
 	private Vector<Task> interfaceTaskset;
+	private Vector<Task> interfaceTaskset_taskcentricUB_only;
 	
 	private CADMPR dMPRInterface;
+	private CADMPR dMPRInterface_taskcentricUB_only;
 	private boolean isInterfaceComputed;
 	
 	private Vector<Component> childComponents;
@@ -48,12 +50,26 @@ public class Component {
 			else 
 				this.computeInterface_Bertogna(true, whichApproach);
 			
-			this.transferInterface2InterfaceTask_ArvindApproach();
+			this.transferInterface2InterfaceTask_ArvindApproach(); //must be before TASK_CENTRIC_UB, otherwise, interface task will be added twice!
+			
+			/*If it's TASKCENTRIC_UB cache aware analysis, we need to use the interface with smaller bandwidth*/
+			//Be careful: Need to get the interface upper bound for this.dMPRInterface_taskcentricUB_only before call this!
+			if(whichApproach == GlobalVariable.TASK_CENTRIC_UB){
+				double bw_taskcentric = this.dMPRInterface.getTheta() * 1.0 / this.dMPRInterface.getPi() + this.dMPRInterface.getM_dedicatedCores();
+				double bw_taskcentric_ub_only = this.dMPRInterface_taskcentricUB_only.getTheta() * 1.0 / this.dMPRInterface_taskcentricUB_only.getPi() + this.dMPRInterface_taskcentricUB_only.getM_dedicatedCores();
+				if(bw_taskcentric > bw_taskcentric_ub_only){ /*choose the one with smaller interface*/
+						this.dMPRInterface = this.dMPRInterface_taskcentricUB_only;
+						this.interfaceTaskset = this.interfaceTaskset_taskcentricUB_only;
+				}
+			}
+			
 			isInterfaceComputed = true;
 		}else{
 			for(int i=0; i<childComponents.size(); i++){
 				childComponents.get(i).doCSA(whichSchedTest, whichApproach);
 			}
+			//init the taskset for each non-leaf component for each computation! Because the child component's interface changes.
+			this.taskset.clear();
 			this.setNonleafComponentWorkload();
 			if(whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST || whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST_FAST) 
 				this.computeInterface_Arvind(false, whichSchedTest,whichApproach);
@@ -115,9 +131,39 @@ public class Component {
 			for(int i=0; i<this.childComponents.size(); i++){
 				this.childComponents.get(i).inflateTaskWCET_taskCentric();
 			}
-		}
-		
-		
+		}		
+	}
+	/**
+	 * Function inflateTaskWCET_onlyVCPUEvent(Component component)
+	 * Inflate each task's WCET with *VCPU-stop event* cache overhead. 
+	 * This function is recursively called from the root component and
+	 * inflate all tasks' WCET with cache overheads in the whole CSA tree
+	 * @see readMe in this package.
+	 */
+	public void inflateTaskWCET_onlyVCPUEvent(){
+		if((this.childComponents == null || this.childComponents.isEmpty()) 
+				&& (this.taskset != null && !this.taskset.isEmpty())){ //leaf component with tasks 
+			double delta_crpmd_ecb = 0; //the max crpmd \tau_i can cause in the domain
+			for(int i=0; i<this.taskset.size(); i++){
+				Task currentTask = this.taskset.get(i);
+				if(delta_crpmd_ecb < currentTask.getDelta_crpmd())
+					delta_crpmd_ecb = currentTask.getDelta_crpmd();
+			}
+			for(int i=0; i<this.taskset.size(); i++){
+				Task currentTask = this.taskset.get(i);
+				/*Here is the difference between inflateTaskWCET_taskCentric() */
+				double inflated_exe = currentTask.getExe() 
+						+ currentTask.getDelta_crpmd() * this.getNumberofVCPUPreemptionEvent(currentTask.getPeriod(), GlobalVariable.TASK)
+						+ currentTask.getDelta_crpmd() *  this.getNumberofVCPUFinishEvent(currentTask.getPeriod(), GlobalVariable.TASK);
+				currentTask.setExe(inflated_exe);
+				
+				
+			}
+		}else{
+			for(int i=0; i<this.childComponents.size(); i++){
+				this.childComponents.get(i).inflateTaskWCET_taskCentric();
+			}
+		}		
 	}
 	
 	/**
@@ -350,6 +396,7 @@ public class Component {
 		if(feasibleInterface.getTheta() < 0 ){// no feasible interface!
 			feasibleInterface.setTheta(GlobalVariable.MAX_INTEGER);
 		}
+		
 		this.dMPRInterface = feasibleInterface;
 		Tool.debug("Component " + this.getComponentName() + " interface: " + this.dMPRInterface.toString() + "\r\n");
 		
@@ -628,7 +675,7 @@ public class Component {
 	 */
 	private double getMaxAk(int k, int m_prime, double Theta, double Pi, int whichApproach, int whichSchedTest){
 		double AkMax = 0;
-		if(whichApproach == GlobalVariable.TASK_CENTRIC){//The maximu Ak in TASKCENTRIC approach
+		if(whichApproach == GlobalVariable.TASK_CENTRIC || whichApproach == GlobalVariable.TASK_CENTRIC_UB){//The maximu Ak in TASKCENTRIC approach
 			Vector<Task> workload = this.taskset;
 			double[] workload_exes = new double[workload.size()];
 			double C_sum = 0;
@@ -666,8 +713,10 @@ public class Component {
 			}
 			if(whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST 
 					&& AkMax > GlobalVariable.AK_MAX_BOUND){
-				Tool.write2Aklog("MPR2\t" + this.componentFilename + "\t Arvind_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! system exit. Not compute interface for this task set\r\n");
-				System.exit(1);
+				Tool.write2Aklog("MPR2\t" + this.componentFilename + "\t Arvind_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! return infeasible interface\r\n");
+				Tool.debug("MPR2\t" + this.componentFilename + "\t Arvind_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! return infeasible interface\r\n");
+				return GlobalVariable.InterfaceInfeasible;
+				
 			}
 			
 		}
@@ -726,6 +775,7 @@ public class Component {
 	
 	/**
 	 * GetMaxCRPMDinComponent
+	 * When the domain is non-leaf domain, the value is 0 because the interface task has overhead 0
 	 * @return The maximum crpmd in this domain/component
 	 */
 	public double getMaxCRPMDinComponent(){
@@ -813,6 +863,7 @@ public class Component {
 	//////////////////Construct function///////////////////////////////
 	public Component(String componentName, String schedulingPolicy, String interfacePeriod, Component parentComponent, boolean isRoot){
 		this.dMPRInterface = new CADMPR();
+		this.dMPRInterface_taskcentricUB_only = new CADMPR();
 		this.isInterfaceComputed = false;
 		this.childComponents = new Vector<Component>();
 		this.taskset = new Vector<Task>();
@@ -822,6 +873,7 @@ public class Component {
 		this.schedulingPolicy = schedulingPolicy;
 		//System.out.println("period="+interfacePeriod+"!");
 		this.dMPRInterface.setPi(Double.parseDouble(interfacePeriod));
+		this.dMPRInterface_taskcentricUB_only.setPi(Double.parseDouble(interfacePeriod));
 		this.parentComponent = parentComponent;
 		this.isRoot = isRoot;
 	
@@ -830,6 +882,7 @@ public class Component {
 	public Component(){
 		super();
 		this.dMPRInterface = new CADMPR();
+		this.dMPRInterface_taskcentricUB_only = new CADMPR();
 		this.isInterfaceComputed = false;
 		this.childComponents = new Vector<Component>();
 		this.taskset = new Vector<Task>();
@@ -894,6 +947,51 @@ public class Component {
 		return str;
 	}
 	
+	public void set_taskcentricUBOnly_interface_and_interfacetasks_for_all_leaf( ){
+		if(childComponents == null || childComponents.isEmpty()){
+			this.set_taskcentricUBOnly_interface_and_interfacetasks( );
+		}else{
+			for(int i=0; i<childComponents.size(); i++){
+				this.getChildComponents().get(i).set_taskcentricUBOnly_interface_and_interfacetasks_for_all_leaf();
+			}
+		}
+	}
+	
+	public void set_taskcentricUBOnly_interface_and_interfacetasks(){
+		this.dMPRInterface_taskcentricUB_only.setM_dedicatedCores(this.dMPRInterface.getM_dedicatedCores());
+		this.dMPRInterface_taskcentricUB_only.setM_prime(this.dMPRInterface.getM_prime());
+		this.dMPRInterface_taskcentricUB_only.setPi(this.dMPRInterface.getPi());
+		double theta_ub = Math.ceil( this.dMPRInterface.getTheta() * 1.0 / this.dMPRInterface.getPi() ) * this.dMPRInterface.getPi();
+		this.dMPRInterface_taskcentricUB_only.setTheta(theta_ub);
+		
+		this.interfaceTaskset_taskcentricUB_only = new Vector<Task>();
+		for(int i = 0; i < this.interfaceTaskset.size(); i++){
+			Task task_ub = this.interfaceTaskset.get(i);
+			if(task_ub.getExe() * 1.0 / task_ub.getPeriod() < 1){
+				task_ub.setExe(task_ub.getPeriod());
+			}
+			Task task = this.interfaceTaskset.get(i).clone();
+			this.interfaceTaskset_taskcentricUB_only.add(task);
+		}
+		
+	}
+	
+	public void clear_cadmpr_interface_and_interfacetasks_for_all_nodes(){
+		if(childComponents == null || childComponents.isEmpty()){
+			this.clear_cadmpr_interface_and_interfacetasks();
+		}else{
+			for(int i=0; i<childComponents.size(); i++){
+				this.getChildComponents().get(i).clear_cadmpr_interface_and_interfacetasks_for_all_nodes();
+			}
+			this.clear_cadmpr_interface_and_interfacetasks();
+		}
+	}
+	
+	public void clear_cadmpr_interface_and_interfacetasks(){
+		this.dMPRInterface.clear();
+		this.interfaceTaskset.clear();
+	}
+
 	
 	//////////Below are get set function for properties//////////////////////////
 	public Vector<Task> getTaskset() {

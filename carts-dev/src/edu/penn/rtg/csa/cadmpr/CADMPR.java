@@ -16,7 +16,7 @@ import edu.penn.rtg.common.GlobalVariable;
  */
 public class CADMPR {
 	private double Pi; 		// period
-	private double Theta;	// execution time
+	private double Theta;	// total execution time = (m-1) full VCPU's budget + 1 "partial" VCPU budget. (the partial VCPU could be full one) 
 	private int m_prime;	// number of VCPU
 	private int m_dedicatedCores;
 	
@@ -42,7 +42,7 @@ public class CADMPR {
 	public double getSBF_CADMPR(double t, int whichApproach, Component currentComponent){
 		double result = 0;
 		
-		if(whichApproach == GlobalVariable.TASK_CENTRIC){
+		if(whichApproach == GlobalVariable.TASK_CENTRIC || whichApproach == GlobalVariable.TASK_CENTRIC_UB){
 			double Theta_part = this.Theta - (this.m_prime - 1)*Pi;
 			double y = Math.floor( (t - (this.Pi - Theta_part)) / this.Pi);
 			result = y * Theta_part + Math.max(0, t - 2*(this.Pi-Theta_part)-y*this.Pi) + (this.m_prime-1)*t;
@@ -69,6 +69,11 @@ public class CADMPR {
 				result = result_partialvp + result_fullvps;
 				return result;
 			}
+			/*Consider the upper bound of the model-centric DMPR! 
+			 * Suppose the interface \omega is calculated for task set
+			 * which only considers higher priority task release event.
+			 * The cache aware interface is upper bounded by the ceiling of \mega's bandwidth;
+			 * because we will transfer a partial VCPU to a full VCPU and   */
 			if(Theta_part == this.Pi){
 				result_partialvp = t;
 				result_fullvps = (this.m_prime - 1)*t;
@@ -77,7 +82,7 @@ public class CADMPR {
 			}
 					
 		}
-		System.err.println("ERROR: in getSBF_CAMPR(). Only support TASK_CENTRIC AND MODEL_CENTRIC; The input whichApproach is: " +  whichApproach);
+		System.err.println("ERROR: in getSBF_CAMPR(). Only support TASK_CENTRIC, TASK_CENTRIC_UB, AND MODEL_CENTRIC; The input whichApproach is: " +  whichApproach);
 		return result;
 	
 	}
@@ -98,6 +103,12 @@ public class CADMPR {
 		this.m_prime = m_prime;
 	}
 
+	public void clear(){
+		this.Theta = 0;
+		this.m_prime = 0;
+		this.m_dedicatedCores = 0;
+	}
+	
 	public String toString(){
 		return "[" +"(" + this.Pi + "," +this.Theta + "," + this.m_prime + "), " + this.m_dedicatedCores + "]";
 	}

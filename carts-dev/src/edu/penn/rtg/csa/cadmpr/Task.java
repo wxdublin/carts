@@ -31,6 +31,19 @@ public class Task {
 		this.delta_crpmd = task.getDelta_crpmd();
 	}
 	
+	public Task clone(){
+		Task task = new Task();
+		task.setPeriod(this.getPeriod());
+		task.setExe(this.getExe());
+		task.setDeadline(this.getDeadline());
+		task.setDelta_rel(this.getDelta_rel());
+		task.setDelta_sch(this.getDelta_sch());
+		task.setDelta_crpmd(this.getDelta_crpmd());
+		task.setDelta_cxs(this.getDelta_cxs());
+		task.setName(this.getName());
+		return task;
+	}
+	
 	/*
 	 * Get the workload bound of tau_i to tau_k
 	 * Equation 3 of Arvind's paper in 09
