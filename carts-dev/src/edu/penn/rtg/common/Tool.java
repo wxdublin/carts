@@ -8,7 +8,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 public class Tool {
-	public static boolean isDebug = true;
+	public static boolean isDebug = false;
 	private static BufferedWriter outputFile;
 	private static String outputFilename = "./run.log";
 	private static BufferedWriter outputFile_Ak;
