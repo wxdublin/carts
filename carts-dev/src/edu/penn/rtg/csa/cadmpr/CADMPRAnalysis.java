@@ -121,7 +121,7 @@ public class CADMPRAnalysis {
 		rootComponent.inflateTaskWCET_onlyVCPUEvent();
 		rootComponent.doCSA(whichSchedTest, GlobalVariable.TASK_CENTRIC_UB); /*when compute leaf component, need compare with interface upper bound*/
 		
-		return result;
+		return result; 
 	}
 	
 	public static String doCADMPRModelCentricAnalysis(Component rootComponent, int whichApproach, int whichSchedTest){

@@ -31,7 +31,7 @@ public class Task {
 		this.delta_crpmd = task.getDelta_crpmd();
 	}
 	
-	public Task clone(){ 
+	public Task clone(){  
 		Task task = new Task();
 		task.setPeriod(this.getPeriod());
 		task.setExe(this.getExe());

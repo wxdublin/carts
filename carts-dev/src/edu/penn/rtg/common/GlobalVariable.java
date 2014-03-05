@@ -21,7 +21,7 @@ public class GlobalVariable {
 	public static final int TASK_CENTRIC_BJORN = 2;
 	public static final int MODEL_CENTRIC = 3;
 	public static final int HYBRID = 4; 
-	public static final int TASK_CENTRIC_UB = 5;
+	public static final int TASK_CENTRIC_UB = 5; 
 	
 	//whichSchedTest
 	public static final int ARVIND_SCHEDTEST = 1;

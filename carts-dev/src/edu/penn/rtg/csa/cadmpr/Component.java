@@ -947,7 +947,7 @@ public class Component {
 		return str;
 	}
 	
-	public void set_taskcentricUBOnly_interface_and_interfacetasks_for_all_leaf( ){
+	public void set_taskcentricUBOnly_interface_and_interfacetasks_for_all_leaf( ){ 
 		if(childComponents == null || childComponents.isEmpty()){
 			this.set_taskcentricUBOnly_interface_and_interfacetasks( );
 		}else{
