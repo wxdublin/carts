@@ -3,5 +3,5 @@
 	<classpathentry excluding="com/wildcrest/j2textprinter/" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/home/pennpanda/github/carts/carts-dev/src"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="output" path="build"/>
 </classpath>

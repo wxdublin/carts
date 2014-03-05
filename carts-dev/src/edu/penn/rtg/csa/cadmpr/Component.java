@@ -369,7 +369,9 @@ public class Component {
 					Tool.write2log("Component name=" + this.componentName  + "\tTheta_i=" + Theta_i + "\t k=" + k + "\t Ak_max=" + Ak_max);
 					for(double Ak = 0; Ak <= Ak_max; Ak += GlobalVariable.TIME_PRECISION){
 						double Dk = workload.get(k).getDeadline();
-						if(this.getDBF(Ak, Dk, m_prime_i, k) > currentInterface.getSBF_CADMPR(Ak+Dk, whichApproach, this)){
+						double dbf = this.getDBF(Ak, Dk, m_prime_i, k);
+						double sbf =  currentInterface.getSBF_CADMPR(Ak+Dk, whichApproach, this);
+						if(dbf > sbf){
 //							Tool.debug("Component " + this.componentName + " currentInterface (" + currentInterface.getPi() + ", " + 
 //									currentInterface.getTheta() + ", " + currentInterface.getM_prime() + ") \t" +  "check task " + k + "\t" + 
 //									"Ak+Dk:" + (Ak+Dk) + 
@@ -675,7 +677,12 @@ public class Component {
 	 */
 	private double getMaxAk(int k, int m_prime, double Theta, double Pi, int whichApproach, int whichSchedTest){
 		double AkMax = 0;
+<<<<<<< HEAD
 		if(whichApproach == GlobalVariable.TASK_CENTRIC || whichApproach == GlobalVariable.TASK_CENTRIC_UB){//The maximu Ak in TASKCENTRIC approach
+=======
+		
+		if(whichApproach == GlobalVariable.TASK_CENTRIC){//The maximu Ak in TASKCENTRIC approach
+>>>>>>> ce9bcbfd9b42b6e0266d79a23fb9608f98e0af9f
 			Vector<Task> workload = this.taskset;
 			double[] workload_exes = new double[workload.size()];
 			double C_sum = 0;
@@ -722,6 +729,11 @@ public class Component {
 		}
 		
 		if(whichApproach == GlobalVariable.MODEL_CENTRIC){
+//			///just for arvind reply begin
+//			if(whichApproach == GlobalVariable.MODEL_CENTRIC){
+//				return 0;
+//			}
+//			///just for arvind reply end
 			Vector<Task> workload = this.taskset;
 			double[] workload_exes = new double[workload.size()];
 			double C_sum = 0, U_tau = 0, U = 0, Theta_part = 0, Theta_star = 0, Theta_prime = 0;

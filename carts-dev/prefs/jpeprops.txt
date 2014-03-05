@@ -1,12 +1,12 @@
 #--- Program Generated file - Do not edit! ---
-#Sat Nov 23 17:43:34 EST 2013
+#Tue Mar 04 12:17:31 EST 2014
 jpe.font=Monospaced\:0\:12
 jpe.gutterwidth=30
 jpe.gutterfore=-5592406
 jpe.bracketcolour=-65536
 jpe.eolmarker=no
 jpe.divsize2=287
-jpe.height=1055
+jpe.height=1026
 jpe.tabs=2
 jpe.lastdoc=no
 jpe.highlightcolour=-2039584
@@ -28,6 +28,6 @@ jpe.invalidlines=no
 jpe.gutterhighlight=-12105913
 user.timezone=America/New_York
 jpe.gutter=no
-jpe.width=1617
+jpe.width=1615
 jpe.caretblink=yes
 jpe.jdkhome=no
