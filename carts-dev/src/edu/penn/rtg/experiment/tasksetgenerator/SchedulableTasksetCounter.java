@@ -123,7 +123,7 @@ public class SchedulableTasksetCounter {
 
 				try{
 					BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputFilename));
-					String str = "util\t" + "bwSaveEach\t" + "\r\n";
+					String str = "#util\t" + "bwSaveEach\t" + "\r\n";
 
 					//Vector<Double> bandwidthSavingEachUtil = new Vector<Double>(interfaces_COMBINED.size());
 					int arrayUtilIndex = 0;
@@ -250,7 +250,7 @@ public class SchedulableTasksetCounter {
 				try{
 					BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputFilename));
 
-					String str = "util\t" + "averageBWSaving\t" + "totalBWSaving\r\n";
+					String str = "#util\t" + "averageBWSaving\t" + "totalBWSaving\r\n";
 
 					double numTasksetBandwidthSave = 0;
 					double bandwidthTotalSave = 0;
@@ -423,7 +423,7 @@ public class SchedulableTasksetCounter {
 		
 		try{
 			BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputFilename));
-			String str = "";
+			String str = "#util\t" + "index\t" + "bw" + "\r\n";
 			int arrayUtilIndex = 0;
 			for(double util = tasksetUtil_min; util<tasksetUtil_max; util += tasksetUtil_step){
 				for(int index = 0; index<tasksetNum_perUtil; index++){
@@ -488,7 +488,7 @@ public class SchedulableTasksetCounter {
 		
 		try{
 			BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputFilename));
-			String str = "";
+			String str = "#util\t" + "averageUtil\t" + "\r\n";
 			int arrayUtilIndex = 0;
 			for(double util = tasksetUtil_min; util<tasksetUtil_max; util += tasksetUtil_step){
 				double bandwidthTotal_perUtil = 0;
@@ -542,7 +542,7 @@ public class SchedulableTasksetCounter {
 		
 		try{
 			BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputFilename));
-			String str = "";
+			String str = "#util\t" + "schedulableRatio\t" + "\r\n";
 			int arrayUtilIndex = 0;
 			for(double util = tasksetUtil_min; util<tasksetUtil_max; util += tasksetUtil_step){
 				double schedulableTasksetTotal_perUtil = 0;
