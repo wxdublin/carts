@@ -9,7 +9,7 @@ package edu.penn.rtg.experiment.tasksetgenerator;
  *
  */
 public class MPRInterface {
-	
+	 
 	private double Pi;
 	private double Theta;
 	private int m_prime;

@@ -6,17 +6,21 @@ public class GlobalVariable {
 	public static final double ONE_TIME_UNIT = Math.pow(0.1,6);
 	
 	public static final int CAMPR2hEDF_TASK_CENTRIC = 1;
-	public static final int CAMPR2hEDF_MODEL_CENTRIC = 2;
-	public static final int MPR2 = 3;
-	public static final int MPR2hEDF = 4;
-	public static final int CAMPR2hEDF_COMBINED = 5; 
+	public static final int CAMPR2hEDF_TASK_CENTRIC_UB = 2;
+	public static final int CAMPR2hEDF_MODEL_CENTRIC = 3;
+	public static final int MPR2 = 4;
+	public static final int MPR2hEDF = 5;
+	public static final int CAMPR2hEDF_COMBINED = 6; 
+	public static final int CAMPR2hEDF_COMBINED_UB = 7;
 	
 	public static final int FILE_NOT_EXIST = -10;
 	public static final int INTERFACE_INFEASIBLE = -1;
 	public static final int TASKSET_EMPTY = 0;
 	
 	public static final int COMBINED_VS_TASKCENTRIC = 1;
-	public static final int DMPR_VS_MPR = 2;
+	public static final int COMBINED_UB_VS_TASKCENTRIC_UB = 2;
+	public static final int TASKCENTRIC_UB_VS_TASKCENTRIC = 3;
+	public static final int DMPR_VS_MPR = 4;
 	
 	public static final int UNIFROM_LIGHT = 1;
 	public static final int UNIFROM_MEDIUM = 2;
