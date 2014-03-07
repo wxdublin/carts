@@ -59,7 +59,7 @@ public class SchedulableTasksetCounter {
 		SchedulableTasksetCounter.countEachTaskBandwidth(tasksetUtil_min, tasksetUtil_step,
 				tasksetUtil_max, tasksetNum_perUtil);
 		SchedulableTasksetCounter.countSchedulableTasksetRatio(tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil, physicalCoreNum);
-		SchedulableTasksetCounter.countBandwidthSaving(tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil);
+		SchedulableTasksetCounter.countAverageBandwidthSaving(tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil);
 		SchedulableTasksetCounter.countEachTasksetBandwidthSaving(tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil);
 	}
 	
@@ -75,97 +75,123 @@ public class SchedulableTasksetCounter {
 		df.setMinimumFractionDigits(2);
 		df.setMaximumFractionDigits(2);
 		int[] groupsBandwidthSaving = {GlobalVariable.COMBINED_VS_TASKCENTRIC,GlobalVariable.COMBINED_UB_VS_TASKCENTRIC_UB, GlobalVariable.DMPR_VS_MPR};	
-
-		for(int i=0; i<groupsBandwidthSaving.length; i++){
-			String outputFilename = "" + df.format(tasksetUtil_min) + "-" + df.format(tasksetUtil_step) + "-" 
-					+df.format(tasksetUtil_max) + "-" + tasksetNum_perUtil + "/" 
-					+ df.format(tasksetUtil_min) + "-" + df.format(tasksetUtil_step) + "-" 
-					+df.format(tasksetUtil_max) + "-" + tasksetNum_perUtil + "-"; 
-			
-			SchedulableTasksetCounter counter_TASKCENTRIC = null; //baseline
-			SchedulableTasksetCounter counter_COMBINED = null; // our proposed approach to compare
-			if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_VS_TASKCENTRIC){
-				counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
-				counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_COMBINED);
-				outputFilename += "EachTasksetBandwidthSave-COMBINED-vs-TASKCENTRIC.stat";
-			}else if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_UB_VS_TASKCENTRIC_UB){
-				counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
-				counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_COMBINED_UB);
-				outputFilename += "EachTasksetBandwidthSave-COMBINED_UB-vs-TASKCENTRIC_UB.stat";
-			}else if(groupsBandwidthSaving[i] == GlobalVariable.TASKCENTRIC_UB_VS_TASKCENTRIC){
-				counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
-				counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
-				outputFilename += "EachTasksetBandwidthSave-TASKCENTRIC_UB-vs-TASKCENTRIC.stat";
-			}else if(groupsBandwidthSaving[i] == GlobalVariable.DMPR_VS_MPR){
-				counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.MPR2);
-				counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.MPR2hEDF);
-				outputFilename += "EachTasksetBandwidthSave-DMPR-vs-MPR.stat";
+		int[] bwSaveOrLost = {GlobalVariable.BW_SAVE, GlobalVariable.BW_LOST};
+		
+		for(int bwSaveOrLostIndex = 0; bwSaveOrLostIndex < bwSaveOrLost.length; bwSaveOrLostIndex++){ /*choose between bandwidth save or lost*/
+			String bandwidthSaveLostStr = "";
+			if(bwSaveOrLost[bwSaveOrLostIndex] == GlobalVariable.BW_SAVE){
+				bandwidthSaveLostStr = "BandwidthSaveEach";
+			}else if(bwSaveOrLost[bwSaveOrLostIndex] == GlobalVariable.BW_LOST){
+				bandwidthSaveLostStr = "BandwidthLostEach";
 			}else{
-				System.err.println("ERROR: Now can only compare COMBINED_VS_TASKCENTRIC, COMBINED_UB_VS_TASKCENTRIC_UB and DMPR_VS_MPR");
+				System.err.println("ERROR: only handle bandwidth save or bandwidth lost file");
 			}
 			
-			counter_TASKCENTRIC.parseInterfaces(tasksetUtil_min,tasksetUtil_step,tasksetUtil_max,tasksetNum_perUtil);
-			counter_COMBINED.parseInterfaces(tasksetUtil_min,tasksetUtil_step,tasksetUtil_max,tasksetNum_perUtil);
-			Vector<Vector<MPRInterface>> interfaces_TASKCENTRIC =  counter_TASKCENTRIC.getmPRInterfaces();
-			Vector<Vector<MPRInterface>> interfaces_COMBINED =  counter_COMBINED.getmPRInterfaces();
+			for(int i=0; i<groupsBandwidthSaving.length; i++){
+				String outputFilename = "" + df.format(tasksetUtil_min) + "-" + df.format(tasksetUtil_step) + "-" 
+						+df.format(tasksetUtil_max) + "-" + tasksetNum_perUtil + "/" 
+						+ df.format(tasksetUtil_min) + "-" + df.format(tasksetUtil_step) + "-" 
+						+df.format(tasksetUtil_max) + "-" + tasksetNum_perUtil + "-"; 
+				
+				SchedulableTasksetCounter counter_TASKCENTRIC = null; //baseline
+				SchedulableTasksetCounter counter_COMBINED = null; // our proposed approach to compare
+				if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_VS_TASKCENTRIC){
+					counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
+					counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_COMBINED);
+					outputFilename += bandwidthSaveLostStr+ "-COMBINED-vs-TASKCENTRIC.stat";
+				}else if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_UB_VS_TASKCENTRIC_UB){
+					counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
+					counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_COMBINED_UB);
+					outputFilename += bandwidthSaveLostStr + "-COMBINED_UB-vs-TASKCENTRIC_UB.stat";
+				}else if(groupsBandwidthSaving[i] == GlobalVariable.TASKCENTRIC_UB_VS_TASKCENTRIC){
+					counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
+					counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
+					outputFilename += bandwidthSaveLostStr + "-TASKCENTRIC_UB-vs-TASKCENTRIC.stat";
+				}else if(groupsBandwidthSaving[i] == GlobalVariable.DMPR_VS_MPR){
+					counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.MPR2);
+					counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.MPR2hEDF);
+					outputFilename += bandwidthSaveLostStr + "-DMPR-vs-MPR.stat";
+				}else{
+					System.err.println("ERROR: Now can only compare COMBINED_VS_TASKCENTRIC, COMBINED_UB_VS_TASKCENTRIC_UB and DMPR_VS_MPR");
+				}
+				
+				counter_TASKCENTRIC.parseInterfaces(tasksetUtil_min,tasksetUtil_step,tasksetUtil_max,tasksetNum_perUtil);
+				counter_COMBINED.parseInterfaces(tasksetUtil_min,tasksetUtil_step,tasksetUtil_max,tasksetNum_perUtil);
+				Vector<Vector<MPRInterface>> interfaces_TASKCENTRIC =  counter_TASKCENTRIC.getmPRInterfaces();
+				Vector<Vector<MPRInterface>> interfaces_COMBINED =  counter_COMBINED.getmPRInterfaces();
 
 
-			try{
-				BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputFilename));
+				try{
+					BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputFilename));
+					String str = "util\t" + "bwSaveEach\t" + "\r\n";
 
-				String str = "";
-
-
-				//Vector<Double> bandwidthSavingEachUtil = new Vector<Double>(interfaces_COMBINED.size());
-				int arrayUtilIndex = 0;
-				for(double util = tasksetUtil_min; util<tasksetUtil_max; util += tasksetUtil_step){
-					for(int index = 0; index<tasksetNum_perUtil; index++){
-						MPRInterface interface_TASKCENTRIC = interfaces_TASKCENTRIC.get(arrayUtilIndex).get(index);
-						MPRInterface interface_COMBINED = interfaces_COMBINED.get(arrayUtilIndex).get(index);
-						double bandwidth_TASKCENTRIC = -1;
-						double bandwidth_COMBINED = -1;
-						if(interface_TASKCENTRIC.getM_prime() > 0 && interface_TASKCENTRIC.getPi() > 0 
-								&& interface_TASKCENTRIC.getTheta() > 0){
-							bandwidth_TASKCENTRIC = interface_TASKCENTRIC.getTheta() * 1.0 / interface_TASKCENTRIC.getPi();
-						}
-						if(interface_COMBINED.getM_prime() > 0 && interface_COMBINED.getPi() > 0 
-								&& interface_COMBINED.getTheta() > 0){
-							bandwidth_COMBINED = interface_COMBINED.getTheta() * 1.0/ interface_COMBINED.getPi();
-						}
-						if(bandwidth_COMBINED < bandwidth_TASKCENTRIC){
-							str += df.format(util) + "\t" + df.format(index)+"\t" + (bandwidth_TASKCENTRIC-bandwidth_COMBINED)+ "\r\n";
-						}else{
-							if(interface_TASKCENTRIC.getM_prime() == 0 && interface_TASKCENTRIC.getTheta() > 0
-									&& interface_COMBINED.getM_prime() >0 && bandwidth_COMBINED > 0){
-								str += df.format(util) + "\t" + df.format(index)+"\t" + bandwidth_COMBINED + "\r\n";
+					//Vector<Double> bandwidthSavingEachUtil = new Vector<Double>(interfaces_COMBINED.size());
+					int arrayUtilIndex = 0;
+					for(double util = tasksetUtil_min; util<tasksetUtil_max; util += tasksetUtil_step){
+						for(int index = 0; index<tasksetNum_perUtil; index++){
+							MPRInterface interface_TASKCENTRIC = interfaces_TASKCENTRIC.get(arrayUtilIndex).get(index);
+							MPRInterface interface_COMBINED = interfaces_COMBINED.get(arrayUtilIndex).get(index);
+							double bandwidth_TASKCENTRIC = -1;
+							double bandwidth_COMBINED = -1;
+							if(interface_TASKCENTRIC.getM_prime() > 0 && interface_TASKCENTRIC.getPi() > 0 
+									&& interface_TASKCENTRIC.getTheta() > 0){
+								bandwidth_TASKCENTRIC = interface_TASKCENTRIC.getTheta() * 1.0 / interface_TASKCENTRIC.getPi();
+							}
+							if(interface_COMBINED.getM_prime() > 0 && interface_COMBINED.getPi() > 0 
+									&& interface_COMBINED.getTheta() > 0){
+								bandwidth_COMBINED = interface_COMBINED.getTheta() * 1.0/ interface_COMBINED.getPi();
+							}
+							if(bwSaveOrLost[bwSaveOrLostIndex] == GlobalVariable.BW_SAVE){
+								if(bandwidth_COMBINED < bandwidth_TASKCENTRIC){
+									str += df.format(util) + "\t" + df.format(index)+"\t" + (bandwidth_TASKCENTRIC-bandwidth_COMBINED)+ "\r\n";
+								}else{ /*when taskcentric bandwidth is invalid, all bandwidth calculated by combied is saved resource */
+									if(interface_TASKCENTRIC.getM_prime() == 0 && interface_TASKCENTRIC.getTheta() > 0
+											&& interface_COMBINED.getM_prime() >0 && bandwidth_COMBINED > 0){
+										str += df.format(util) + "\t" + df.format(index)+"\t" + bandwidth_COMBINED + "\r\n";
+									}
+								}
+							}else if(bwSaveOrLost[bwSaveOrLostIndex] == GlobalVariable.BW_LOST){
+								if(bandwidth_COMBINED > bandwidth_TASKCENTRIC){
+									str += df.format(util) + "\t" + df.format(index)+"\t" + (bandwidth_TASKCENTRIC-bandwidth_COMBINED)+ "\r\n";
+								}else if(bandwidth_COMBINED < bandwidth_TASKCENTRIC){ /*when combined interface is invalid, all bandwidth calculated by taskcentric is saved resource*/
+									if(interface_COMBINED.getM_prime() == 0 && interface_COMBINED.getTheta() > 0
+											&& interface_TASKCENTRIC.getM_prime() >0 && bandwidth_TASKCENTRIC > 0){
+										str += df.format(util) + "\t" + df.format(index)+"\t" + bandwidth_TASKCENTRIC + "\r\n";
+									}
+								}else{ /*bandwidth_COMBINED == bandwidth_TASKCENTRIC */
+									str += df.format(util) + "\t" + df.format(index)+"\t" + df.format(0.00) + "\r\n";
+								}
 							}
 						}
-
+						arrayUtilIndex++;
 					}
-					arrayUtilIndex++;
-				}
-				outputFile.write(str);
-				outputFile.close();
-				if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_VS_TASKCENTRIC){
-					System.out.println("==========Each Bandwdith Save (COMBINED v.s. TASKCENTRIC)================");
-				}else if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_UB_VS_TASKCENTRIC_UB){
-					System.out.println("==========Each Bandwdith Save (COMBINED_UB v.s. TASKCENTRIC_UB)================");
-				}else if(groupsBandwidthSaving[i] == GlobalVariable.TASKCENTRIC_UB_VS_TASKCENTRIC){
-					System.out.println("==========Each Bandwdith Save (TASKCENTRIC_UB v.s. TASKCENTRIC)================");
-				}else if(groupsBandwidthSaving[i] == GlobalVariable.DMPR_VS_MPR){
-					System.out.println("==========Each Bandwdith Save (DMPR v.s. MPR)================");
-				}
-				System.out.println(str);
+					outputFile.write(str);
+					outputFile.close();
+					if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_VS_TASKCENTRIC){
+						System.out.println("==========Each Bandwdith Save/LOST (COMBINED v.s. TASKCENTRIC)================");
+					}else if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_UB_VS_TASKCENTRIC_UB){
+						System.out.println("==========Each Bandwdith Save/LOST (COMBINED_UB v.s. TASKCENTRIC_UB)================");
+					}else if(groupsBandwidthSaving[i] == GlobalVariable.TASKCENTRIC_UB_VS_TASKCENTRIC){
+						System.out.println("==========Each Bandwdith Save/LOST (TASKCENTRIC_UB v.s. TASKCENTRIC)================");
+					}else if(groupsBandwidthSaving[i] == GlobalVariable.DMPR_VS_MPR){
+						System.out.println("==========Each Bandwdith Save (DMPR v.s. MPR)================");
+					}
+					System.out.println(str);
 
-			}catch (Exception e){
-				System.err.println("Open file" + outputFilename + " fails");
+				}catch (Exception e){
+					System.err.println("Open file" + outputFilename + " fails");
+				}
 			}
-			
 		}
 		
 	}
 	
-	public static void countBandwidthSaving(double tasksetUtil_min,double tasksetUtil_step,
+	/*
+	 * Count the total bandwidth saving per utilization
+	 * This function should be depreciated because it can be incorporated into countAverageBandwdithSaving() and
+	 * print out as the third column.
+	 * */
+	public static void countAverageBandwidthSaving(double tasksetUtil_min,double tasksetUtil_step,
 			double tasksetUtil_max, int tasksetNum_perUtil){
 		DecimalFormat df = new DecimalFormat("#.##");
 		df.setMinimumFractionDigits(2);
@@ -175,111 +201,146 @@ public class SchedulableTasksetCounter {
 				GlobalVariable.COMBINED_UB_VS_TASKCENTRIC_UB,
 				GlobalVariable.TASKCENTRIC_UB_VS_TASKCENTRIC, 
 				GlobalVariable.DMPR_VS_MPR};
+		int[] bwSaveOrLost = {GlobalVariable.BW_SAVE, GlobalVariable.BW_LOST};
 		
-		for(int i=0; i<groupsBandwidthSaving.length; i++){
-			String outputFilename = "" + df.format(tasksetUtil_min) + "-" + df.format(tasksetUtil_step) + "-" 
-					+df.format(tasksetUtil_max) + "-" + tasksetNum_perUtil + "/" 
-					+ df.format(tasksetUtil_min) + "-" + df.format(tasksetUtil_step) + "-" 
-					+df.format(tasksetUtil_max) + "-" + tasksetNum_perUtil + "-"; 
-			
-			SchedulableTasksetCounter counter_TASKCENTRIC = null; //BASELINE APPROACH
-			SchedulableTasksetCounter counter_COMBINED = null; // OUR PROPOSED APPROACH TO COMPARE
-			
-			if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_VS_TASKCENTRIC){
-				counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
-				counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_COMBINED);
-				outputFilename += "BandwidthSaveAverage-COMBINED-vs-TASKCENTRIC.stat";
-			}else if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_UB_VS_TASKCENTRIC_UB){
-				counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
-				counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_COMBINED_UB);
-				outputFilename += "BandwidthSaveAverage-COMBINED_UB-vs-TASKCENTRIC_UB.stat";
-			}else if(groupsBandwidthSaving[i] == GlobalVariable.TASKCENTRIC_UB_VS_TASKCENTRIC){
-				counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
-				counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
-				outputFilename += "BandwidthSaveAverage-TASKCENTRIC_UB-vs-TASKCENTRIC.stat";
-			}else if(groupsBandwidthSaving[i] == GlobalVariable.DMPR_VS_MPR){
-				counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.MPR2);
-				counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.MPR2hEDF);
-				outputFilename += "BandwidthSaveAverage-DMPR-vs-MPR.stat";
+		for(int bwSaveOrLostIndex = 0; bwSaveOrLostIndex < bwSaveOrLost.length; bwSaveOrLostIndex++){ /*choose between bandwidth save or lost*/
+			String bandwidthSaveLostStr = "";
+			if(bwSaveOrLost[bwSaveOrLostIndex] == GlobalVariable.BW_SAVE){
+				bandwidthSaveLostStr = "BandwidthSaveAverage";
+			}else if(bwSaveOrLost[bwSaveOrLostIndex] == GlobalVariable.BW_LOST){
+				bandwidthSaveLostStr = "BandwidthLostAverage";
 			}else{
-				System.err.println("ERROR: Now can only compare COMBINED_VS_TASKCENTRIC and DMPR_VS_MPR");
+				System.err.println("ERROR: only handle bandwidth save or bandwidth lost file");
 			}
-			 
-			counter_TASKCENTRIC.parseInterfaces(tasksetUtil_min,tasksetUtil_step,tasksetUtil_max,tasksetNum_perUtil);
-			counter_COMBINED.parseInterfaces(tasksetUtil_min,tasksetUtil_step,tasksetUtil_max,tasksetNum_perUtil);
-			Vector<Vector<MPRInterface>> interfaces_TASKCENTRIC =  counter_TASKCENTRIC.getmPRInterfaces();
-			Vector<Vector<MPRInterface>> interfaces_COMBINED =  counter_COMBINED.getmPRInterfaces();
-		
-			try{
-				BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputFilename));
-
-				String str = "";
-
-				double numTasksetBandwidthSave = 0;
-				double numTasksetTotalTaskset = 0;
-				//Vector<Double> bandwidthSavingEachUtil = new Vector<Double>(interfaces_COMBINED.size());
-				int arrayUtilIndex = 0;
-				for(double util = tasksetUtil_min; util<tasksetUtil_max; util += tasksetUtil_step){
-					double bandwidthTotalSavePerUtil = 0;
-					double numTasksetBandwidthSavePerUtil = 0;
-					for(int index = 0; index<tasksetNum_perUtil; index++){
-						MPRInterface interface_TASKCENTRIC = interfaces_TASKCENTRIC.get(arrayUtilIndex).get(index);
-						MPRInterface interface_COMBINED = interfaces_COMBINED.get(arrayUtilIndex).get(index);
-						double bandwidth_TASKCENTRIC = -1;
-						double bandwidth_COMBINED = -1;
-						if(interface_TASKCENTRIC.getM_prime() > 0 && interface_TASKCENTRIC.getPi() > 0 
-								&& interface_TASKCENTRIC.getTheta() > 0){
-							bandwidth_TASKCENTRIC = interface_TASKCENTRIC.getTheta() * 1.0 / interface_TASKCENTRIC.getPi();
-						}
-						if(interface_COMBINED.getM_prime() > 0 && interface_COMBINED.getPi() > 0 
-								&& interface_COMBINED.getTheta() > 0){
-							bandwidth_COMBINED = interface_COMBINED.getTheta() * 1.0/ interface_COMBINED.getPi();
-						}
-						if(bandwidth_COMBINED < bandwidth_TASKCENTRIC){
-							bandwidthTotalSavePerUtil += bandwidth_TASKCENTRIC - bandwidth_COMBINED;
-							numTasksetBandwidthSavePerUtil++;
-							numTasksetBandwidthSave++;
-						}else{
-							if(interface_TASKCENTRIC.getM_prime()==0 && interface_TASKCENTRIC.getTheta()>0 
-									&& interface_COMBINED.getM_prime() != 0 && bandwidth_COMBINED != 0 ){
-								bandwidthTotalSavePerUtil += bandwidth_COMBINED;
-								numTasksetBandwidthSavePerUtil++;
-								numTasksetBandwidthSave++;
-							}
-						}
-						numTasksetTotalTaskset++;
-					}
-					if(numTasksetBandwidthSavePerUtil != 0){
-						//str += df.format(util) + "\t" + df.format(bandwidthTotalSavePerUtil/numTasksetBandwidthSavePerUtil) + "\r\n";
-						str += df.format(util) + "\t" + df.format(bandwidthTotalSavePerUtil) + "\r\n";
-					}else{
-						str += df.format(util) + "\t" + df.format(0.00) + "\r\n";
-					}
-					arrayUtilIndex++;
-				}
-
-				if(numTasksetTotalTaskset != 0){
-					str += df.format(-1) + "\t" + df.format(numTasksetBandwidthSave*1.0/numTasksetTotalTaskset);
-				}
-				outputFile.write(str);
-				outputFile.close();
+			
+			for(int i=0; i<groupsBandwidthSaving.length; i++){
+				String outputFilename = "" + df.format(tasksetUtil_min) + "-" + df.format(tasksetUtil_step) + "-" 
+						+df.format(tasksetUtil_max) + "-" + tasksetNum_perUtil + "/" 
+						+ df.format(tasksetUtil_min) + "-" + df.format(tasksetUtil_step) + "-" 
+						+df.format(tasksetUtil_max) + "-" + tasksetNum_perUtil + "-"; 
+				
+				SchedulableTasksetCounter counter_TASKCENTRIC = null; //BASELINE APPROACH
+				SchedulableTasksetCounter counter_COMBINED = null; // OUR PROPOSED APPROACH TO COMPARE
+				
 				if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_VS_TASKCENTRIC){
-					System.out.println("==========Average Bandwdith Save (COMBINED v.s. TASKCENTRIC)================");
+					counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
+					counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_COMBINED);
+					outputFilename += bandwidthSaveLostStr + "-COMBINED-vs-TASKCENTRIC.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_UB_VS_TASKCENTRIC_UB){
-					System.out.println("==========Average Bandwdith Save (COMBINED_UB v.s. TASKCENTRIC_UB)================");
+					counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
+					counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_COMBINED_UB);
+					outputFilename += bandwidthSaveLostStr + "-COMBINED_UB-vs-TASKCENTRIC_UB.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.TASKCENTRIC_UB_VS_TASKCENTRIC){
-					System.out.println("==========Average Bandwdith Save (TASKCENTRIC_UB v.s. TASKCENTRIC)================");
+					counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
+					counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
+					outputFilename += bandwidthSaveLostStr + "-TASKCENTRIC_UB-vs-TASKCENTRIC.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.DMPR_VS_MPR){
-					System.out.println("==========Average Bandwdith Save (DMPR v.s. MPR)================");
+					counter_TASKCENTRIC = new SchedulableTasksetCounter(GlobalVariable.MPR2);
+					counter_COMBINED = new SchedulableTasksetCounter(GlobalVariable.MPR2hEDF);
+					outputFilename += bandwidthSaveLostStr + "-DMPR-vs-MPR.stat";
+				}else{
+					System.err.println("ERROR: Now can only compare COMBINED_VS_TASKCENTRIC and DMPR_VS_MPR");
 				}
-				System.out.println(str);
-				System.out.println("Ratio of task set that COMBINED/DMPR saves bandwidth than TASKCENTRIC/DMPR: " + df.format(numTasksetBandwidthSave*1.0/numTasksetTotalTaskset));
+				 
+				counter_TASKCENTRIC.parseInterfaces(tasksetUtil_min,tasksetUtil_step,tasksetUtil_max,tasksetNum_perUtil);
+				counter_COMBINED.parseInterfaces(tasksetUtil_min,tasksetUtil_step,tasksetUtil_max,tasksetNum_perUtil);
+				Vector<Vector<MPRInterface>> interfaces_TASKCENTRIC =  counter_TASKCENTRIC.getmPRInterfaces();
+				Vector<Vector<MPRInterface>> interfaces_COMBINED =  counter_COMBINED.getmPRInterfaces();
+			
+				try{
+					BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputFilename));
 
-			}catch (Exception e){
-				System.err.println("Open file" + outputFilename + " fails");
+					String str = "util\t" + "averageBWSaving\t" + "totalBWSaving\r\n";
+
+					double numTasksetBandwidthSave = 0;
+					double bandwidthTotalSave = 0;
+					double numTasksetTotalTaskset = 0; /*include invalide taskset, so it's 25 for experiment.*/
+					//Vector<Double> bandwidthSavingEachUtil = new Vector<Double>(interfaces_COMBINED.size());
+					int arrayUtilIndex = 0;
+					for(double util = tasksetUtil_min; util<tasksetUtil_max; util += tasksetUtil_step){
+						double bandwidthTotalSavePerUtil = 0;
+						double numTasksetBandwidthSavePerUtil = 0;
+						for(int index = 0; index<tasksetNum_perUtil; index++){
+							MPRInterface interface_TASKCENTRIC = interfaces_TASKCENTRIC.get(arrayUtilIndex).get(index);
+							MPRInterface interface_COMBINED = interfaces_COMBINED.get(arrayUtilIndex).get(index);
+							double bandwidth_TASKCENTRIC = -1;
+							double bandwidth_COMBINED = -1;
+							if(interface_TASKCENTRIC.getM_prime() > 0 && interface_TASKCENTRIC.getPi() > 0 
+									&& interface_TASKCENTRIC.getTheta() > 0){
+								bandwidth_TASKCENTRIC = interface_TASKCENTRIC.getTheta() * 1.0 / interface_TASKCENTRIC.getPi();
+							}
+							if(interface_COMBINED.getM_prime() > 0 && interface_COMBINED.getPi() > 0 
+									&& interface_COMBINED.getTheta() > 0){
+								bandwidth_COMBINED = interface_COMBINED.getTheta() * 1.0/ interface_COMBINED.getPi();
+							}
+							if(bwSaveOrLost[bwSaveOrLostIndex] == GlobalVariable.BW_SAVE){
+								if(bandwidth_COMBINED < bandwidth_TASKCENTRIC){/*when Combined approach is better*/
+									bandwidthTotalSavePerUtil += bandwidth_TASKCENTRIC - bandwidth_COMBINED;
+									numTasksetBandwidthSavePerUtil++;
+									bandwidthTotalSave += bandwidthTotalSavePerUtil;
+									numTasksetBandwidthSave++;
+								}else{
+									if(interface_TASKCENTRIC.getM_prime()==0 && interface_TASKCENTRIC.getTheta()>0 
+											&& interface_COMBINED.getM_prime() != 0 && bandwidth_COMBINED != 0 ){
+										bandwidthTotalSavePerUtil += bandwidth_COMBINED;
+										numTasksetBandwidthSavePerUtil++;
+										bandwidthTotalSave += bandwidthTotalSavePerUtil;
+										numTasksetBandwidthSave++;
+									}
+								}
+							}else if(bwSaveOrLost[bwSaveOrLostIndex] == GlobalVariable.BW_LOST){
+								if(bandwidth_COMBINED > bandwidth_TASKCENTRIC){/*when Combined approach is not better*/
+									bandwidthTotalSavePerUtil += bandwidth_TASKCENTRIC - bandwidth_COMBINED;//it's negative
+									numTasksetBandwidthSavePerUtil++;
+									bandwidthTotalSave += bandwidthTotalSavePerUtil;
+									numTasksetBandwidthSave++;
+								}else{
+									if(interface_COMBINED.getM_prime()==0 && interface_COMBINED.getTheta()>0 
+											&& interface_TASKCENTRIC.getM_prime() != 0 && bandwidth_TASKCENTRIC != 0 ){
+										bandwidthTotalSavePerUtil += 0 - bandwidth_TASKCENTRIC;
+										numTasksetBandwidthSavePerUtil++;
+										bandwidthTotalSave += bandwidthTotalSavePerUtil;
+										numTasksetBandwidthSave++;
+									}
+								}
+							}
+						
+							numTasksetTotalTaskset++;
+						}
+						if(numTasksetBandwidthSavePerUtil != 0){
+							//str += df.format(util) + "\t" + df.format(bandwidthTotalSavePerUtil/numTasksetBandwidthSavePerUtil) + "\r\n";
+							str += df.format(util) + "\t" + df.format(bandwidthTotalSavePerUtil*1.0/numTasksetBandwidthSavePerUtil) + "\t" + df.format(bandwidthTotalSavePerUtil)+ "\r\n";
+						}else{
+							str += df.format(util) + "\t" + df.format(0.00) + "\t" + df.format(0.00) + "\r\n";
+						}
+						arrayUtilIndex++;
+					}
+					/*stat for all utilization: average and total bw saving/lost for all utilization*/
+					if(numTasksetBandwidthSave != 0){
+						str += df.format(-1) + "\t" + df.format(bandwidthTotalSave*1.0/numTasksetBandwidthSave) + "\t" + df.format(bandwidthTotalSave);
+					}else{
+						str += df.format(-1) + "\t" + df.format(0.00) + "\t" + df.format(0.00) ;
+					}
+					outputFile.write(str);
+					outputFile.close();
+					if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_VS_TASKCENTRIC){
+						System.out.println("==========Total Bandwdith Save/Lost (COMBINED v.s. TASKCENTRIC)================");
+					}else if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_UB_VS_TASKCENTRIC_UB){
+						System.out.println("==========Total Bandwdith Save/Lost (COMBINED_UB v.s. TASKCENTRIC_UB)================");
+					}else if(groupsBandwidthSaving[i] == GlobalVariable.TASKCENTRIC_UB_VS_TASKCENTRIC){
+						System.out.println("==========Total Bandwdith Save/Lost (TASKCENTRIC_UB v.s. TASKCENTRIC)================");
+					}else if(groupsBandwidthSaving[i] == GlobalVariable.DMPR_VS_MPR){
+						System.out.println("==========Total Bandwdith Save (DMPR v.s. MPR)================");
+					}
+					System.out.println(str);
+					System.out.println("Ratio of task set that COMBINED/DMPR saves bandwidth than TASKCENTRIC/DMPR: " + df.format(numTasksetBandwidthSave*1.0/numTasksetTotalTaskset));
+
+				}catch (Exception e){
+					System.err.println("Open file" + outputFilename + " fails");
+				}
 			}
+			
 		}
-		
 	}
 	
 	/**

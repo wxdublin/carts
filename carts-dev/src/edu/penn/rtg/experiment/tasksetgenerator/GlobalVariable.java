@@ -13,6 +13,9 @@ public class GlobalVariable {
 	public static final int CAMPR2hEDF_COMBINED = 6; 
 	public static final int CAMPR2hEDF_COMBINED_UB = 7;
 	
+	public static final int BW_SAVE = 1;
+	public static final int BW_LOST = 2;
+	
 	public static final int FILE_NOT_EXIST = -10;
 	public static final int INTERFACE_INFEASIBLE = -1;
 	public static final int TASKSET_EMPTY = 0;
