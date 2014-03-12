@@ -761,8 +761,9 @@ public class Component {
 			}
 			if(whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST 
 					&& AkMax > GlobalVariable.AK_MAX_BOUND){
-				Tool.write2Aklog("MPR2\t" + this.componentFilename + "\t Arvind_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! system exit. Not compute interface for this task set\r\n");
-				System.exit(1);
+				Tool.write2Aklog("MPR2\t" + this.componentFilename + "\t Arvind_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! return infeasible Ak and skip this bandwidth interface\r\n");
+				return GlobalVariable.InterfaceInfeasible;
+				//System.exit(1);
 				
 			}
 			

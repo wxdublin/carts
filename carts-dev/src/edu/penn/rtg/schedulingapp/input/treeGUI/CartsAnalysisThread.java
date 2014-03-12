@@ -79,11 +79,20 @@ public class CartsAnalysisThread extends Thread{
 		comp.getSchCom().setRevised(false);
 		
 		//String str = Analysis.preProcess(algo,comp);
-		if(algo.equalsIgnoreCase("MPR") || algo.equalsIgnoreCase("MPR2")){
-			System.out.println("compute2(): MPR");
+		if(algo.equalsIgnoreCase("MPR") || algo.equalsIgnoreCase("MPR2") || algo.equalsIgnoreCase("MPR2_Meng") || algo.equalsIgnoreCase("MPR_Meng")){
+			System.out.println("compute2(): MPR or MPR2_Meng");
+			int sbf_type = -1;
+			if(algo.equalsIgnoreCase("MPR") || algo.equalsIgnoreCase("MPR2") ){
+				sbf_type = GlobalVariable.MPR_SBF_ARVIND;
+			}else if( algo.equalsIgnoreCase("MPR2_Meng") || algo.equalsIgnoreCase("MPR_Meng") ){
+				sbf_type = GlobalVariable.MPR_SBF_MENG;
+			}else{
+				System.err.println("No such analysis model! only support MPR/MPR2/MPR2_Meng/MPR_Meng. Exit(1)\n");
+				System.exit(1);
+			}
 			edu.penn.rtg.csa.mpr2.Component comp_mpr2 = SchedulingTreeRoot2ComponentRoot.transfer2MPR2Root(comp,null);
 			String result_mpr= edu.penn.rtg.csa.mpr2.MPR2Analysis.
-						doCSA_start(comp_mpr2, GlobalVariable.ARVIND_SCHEDTEST_FAST);
+						doCSA_start(comp_mpr2, GlobalVariable.ARVIND_SCHEDTEST_FAST, sbf_type);
 			if(!result_mpr.contains("SUCCESS")){
 				JOptionPane.showMessageDialog(null,result_mpr,"ERROR!",JOptionPane.ERROR_MESSAGE);
 				return;

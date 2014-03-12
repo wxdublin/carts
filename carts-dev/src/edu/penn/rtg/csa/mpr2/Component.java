@@ -38,14 +38,14 @@ public class Component {
 	 * @see computerInterface()
 	 * @return 0 correct; 1 wrong
 	 */
-	public double doCSA(int whichSchedTest, String algorithm){
+	public double doCSA(int whichSchedTest, int sbf_type,  String algorithm){
 		if(childComponents == null || childComponents.isEmpty()){ //leaf component
 			if(whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST 
 					|| whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST_FAST
 					|| whichSchedTest == GlobalVariable.MENG_SCHEDTEST){
-				this.computeInterface_Arvind(true, whichSchedTest, algorithm);
+				this.computeInterface_Arvind(true, whichSchedTest,sbf_type, algorithm);
 			}else if(whichSchedTest == GlobalVariable.MARKO_SCHEDTEST){
-				this.computeInterface_Bertogna(true, algorithm);
+				this.computeInterface_Bertogna(true, sbf_type, algorithm);
 			}else{
 				System.err.println("Only support Arvind and Marko's test. The input schedulability test name is not supported.");
 				System.exit(3);// ERRNO 3 Not supported schedulability test
@@ -55,15 +55,15 @@ public class Component {
 			isInterfaceComputed = true;
 		}else{//non-leaf component
 			for(int i=0; i<childComponents.size(); i++){
-				childComponents.get(i).doCSA(whichSchedTest, algorithm);
+				childComponents.get(i).doCSA(whichSchedTest,sbf_type, algorithm);
 			}
 			this.setNonleafComponentWorkload();
 			if(whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST 
 					|| whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST_FAST 
 					|| whichSchedTest == GlobalVariable.MENG_SCHEDTEST){
-				this.computeInterface_Arvind(false,whichSchedTest, algorithm);
+				this.computeInterface_Arvind(false,whichSchedTest, sbf_type, algorithm);
 			}else if(whichSchedTest == GlobalVariable.MARKO_SCHEDTEST){
-				this.computeInterface_Bertogna(false, algorithm);
+				this.computeInterface_Bertogna(false, sbf_type, algorithm);
 			}else{
 				System.err.println("Only support Arvind and Marko's test. The input schedulability test name is not supported.");
 				System.exit(3);// ERRNO 3 Not supported schedulability test
@@ -85,7 +85,7 @@ public class Component {
 	 * @return 0 correct; 1 wrong
 	 * 
 	 */
-	private double computeInterface_Arvind(boolean isLeafComponent, int whichSchedTest, String algorithm){ //finished
+	private double computeInterface_Arvind(boolean isLeafComponent, int whichSchedTest, int sbf_type, String algorithm){ //finished
 
 //		if(!algorithm.equalsIgnoreCase("gEDF")){
 //			System.err.println("ATTENTION:Arvind_SchedTest does not support other algorithms except for gEDF right now.\r\n" +
@@ -170,8 +170,10 @@ public class Component {
 					Tool.write2log("Component name=" + this.componentName  + "\tTheta_i=" + Theta_i + "\t k=" + k + "\t Ak_max=" + Ak_max);
 					for(double Ak = 0; Ak <= Ak_max; Ak += GlobalVariable.TIME_PRECISION){
 						double Dk = workload.get(k).getDeadline();
+						double resource_demand = this.getDBF(Ak, Dk, m_prime_i, k, algorithm);
+						double resource_supply = currentInterface.getSBF(Ak+Dk, sbf_type);							
 						
-						if(this.getDBF(Ak, Dk, m_prime_i, k, algorithm) > currentInterface.getSBF(Ak+Dk)){
+						if( resource_demand > resource_supply){
 							//Tool.debug("Component " + this.componentName + " currentInterface (" + currentInterface.getPi() + ", " + 
 							//		currentInterface.getTheta() + ", " + currentInterface.getM_prime() + ") \t" +  "check task " + k + "\t" + 
 							//		"Ak+Dk:" + (Ak+Dk) + 
@@ -212,7 +214,7 @@ public class Component {
 	 * @param algorithm
 	 * @return
 	 */
-	public double checkThetaMonotonic(int whichSchedTest, String algorithm){
+	public double checkThetaMonotonic(int whichSchedTest, int sbf_type, String algorithm){
 		algorithm = "gEDF";
 		if(whichSchedTest == GlobalVariable.MARKO_SCHEDTEST ){
 			System.err.println("whichSchedTest is Bertogna! CheckThetaMonotonic is only for Arvind test!");
@@ -222,7 +224,7 @@ public class Component {
 		
 		if(this.taskset == null || this.taskset.isEmpty()){
 			for(int i=0; i<this.childComponents.size(); i++){
-				this.childComponents.get(i).checkThetaMonotonic(whichSchedTest, algorithm);
+				this.childComponents.get(i).checkThetaMonotonic(whichSchedTest,sbf_type,  algorithm);
 			}
 		}
 		
@@ -269,7 +271,7 @@ public class Component {
 				for(double Ak = 0; Ak <= Ak_max; Ak += GlobalVariable.TIME_PRECISION){
 					double Dk = workload.get(k).getDeadline();
 
-					if(this.getDBF(Ak, Dk, m_prime_opt, k, algorithm) > currentInterface.getSBF(Ak+Dk)){
+					if(this.getDBF(Ak, Dk, m_prime_opt, k, algorithm) > currentInterface.getSBF(Ak+Dk, sbf_type)){
 						//Tool.debug("Component " + this.componentName + " currentInterface (" + currentInterface.getPi() + ", " + 
 						//		currentInterface.getTheta() + ", " + currentInterface.getM_prime() + ") \t" +  "check task " + k + "\t" + 
 						//		"Ak+Dk:" + (Ak+Dk) + 
@@ -304,7 +306,7 @@ public class Component {
 	 * @return 0 correct; 1 wrong
 	 * 
 	 */
-	private double computeInterface_Bertogna(boolean isLeafComponent, String algorithm){ //finished
+	private double computeInterface_Bertogna(boolean isLeafComponent, int sbf_type, String algorithm){ //finished
 //		if(!this.schedulingPolicy.equalsIgnoreCase("gEDF")){
 //			Tool.write2log("Component's scheduling policy is not gEDF! It's not supported by the MPR2 resrouce model! exit(1)");
 //			System.err.println("Component's scheduling policy is not gEDF! It's not supported by the MPR2 resrouce model! exit(1)");
@@ -376,7 +378,7 @@ public class Component {
 					Task task_k = workload.get(k);
 					double interference = this.getDBF_Bertogna(k, algorithm) ;
 					double totalInterference = interference + m_prime_i * (task_k.getExe() - GlobalVariable.ONE_TIME_UNIT);
-					double totalSupply = currentInterface.getSBF(task_k.getDeadline());
+					double totalSupply = currentInterface.getSBF(task_k.getDeadline(), sbf_type);
 					if( totalInterference >= totalSupply ){
 						is_interface_feasible = false;
 						break;
@@ -483,6 +485,8 @@ public class Component {
 		double Theta = currentInterface.getTheta();
 		double m_prime = currentInterface.getM_prime();
 		
+		this.interfaceTaskset.clear();
+		
 		if(Theta < 0 || Theta > m_prime*Pi){ // invalid interface!
 			this.interfaceTaskset.add(new Task(Pi,GlobalVariable.MAX_INTEGER,Pi));
 			System.out.println("Invalid Interface of Component" + this.componentName + "\r\n");
@@ -504,6 +508,7 @@ public class Component {
 		for(int j=0;j<k;j++) {
 			exec=(int) (Math.floor(Theta/m_prime)+1);
 			interfaceTask =new Task(Pi,exec,Pi);
+			interfaceTask.setName("" + interfaceTask.hashCode());
 			this.interfaceTaskset.add(interfaceTask);
 			Tool.debug("===InterfaceTransfer====" + "interfaceTask " + num + ": " +interfaceTask.toString() + "\r\n");
 			num++;
@@ -517,6 +522,7 @@ public class Component {
 		}
 
 		interfaceTask =new Task(Pi,exec,Pi);
+		interfaceTask.setName("" + interfaceTask.hashCode());
 		Tool.debug("===InterfaceTransfer====" + "interfaceTask " + num + ": " + interfaceTask.toString() + "\r\n");
 		this.interfaceTaskset.add(interfaceTask);
 		num++;
@@ -524,6 +530,7 @@ public class Component {
 		for(int j=num;j<m_prime;j++) {
 			exec=(int) (Math.floor(Theta/m_prime));
 			interfaceTask =new Task(Pi,exec,Pi);
+			interfaceTask.setName("" + interfaceTask.hashCode());
 			this.interfaceTaskset.add(interfaceTask);
 			Tool.debug("===InterfaceTransfer===="+ "interfaceTask " + num + ": " + interfaceTask.toString() + "\r\n");
 		}

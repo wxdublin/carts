@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 
+import edu.penn.rtg.common.GlobalVariable;
 import edu.penn.rtg.common.Tool;
 
 
@@ -40,9 +41,17 @@ public class XMLWriter4MPR2 {
 		
 	}
 	
-	public void writeComponentInterfaceTree(){
+	public void writeComponentInterfaceTree(int sbf_type){
 		try{
-			this.writeComponentInterface(this.rootComponent);
+			String analysisModel = "";
+			if(sbf_type == GlobalVariable.MPR_SBF_ARVIND){
+				analysisModel = "MPR2";
+			}else if(sbf_type == GlobalVariable.MPR_SBF_MENG){
+				analysisModel = "MPR2_Meng";
+			}else{
+				analysisModel = "Unknown";
+			}				
+			this.writeComponentInterface(this.rootComponent, analysisModel);
 			Tool.debug(resultString);
 			outputFile.write(resultString);
 			outputFile.flush();
@@ -54,8 +63,8 @@ public class XMLWriter4MPR2 {
 		
 	}
 	
-	private void writeComponentInterface(Component component){
-		resultString = resultString + "<component name=\"" + component.getComponentName() + "\" resource_model=\"MPR2 model\" >\r\n" +
+	private void writeComponentInterface(Component component, String analysisModel){
+		resultString = resultString + "<component name=\"" + component.getComponentName() + "\" resource_model=\"" + analysisModel + " model\" >\r\n" +
 					"<resource>\r\n" +
 						"<model cpus=\"" + component.getmPR2Interface().getM_prime() + "\" period=\"" + df.format(component.getmPR2Interface().getPi()) + "\" execution_time=\"" + df.format(component.getmPR2Interface().getTheta()) + "\"> </model> \r\n" +
 					"</resource> \r\n"; 
@@ -69,7 +78,7 @@ public class XMLWriter4MPR2 {
 		resultString += "</processed_task> \r\n";
 		//recursively print out the child components' interface
 		for(int i=0; i<component.getChildComponents().size(); i++){
-			writeComponentInterface(component.getChildComponents().get(i));
+			writeComponentInterface(component.getChildComponents().get(i), analysisModel);
 		}
 		resultString += "</component>\r\n";		
 	}
@@ -118,7 +127,7 @@ public class XMLWriter4MPR2 {
 			XMLWriter4MPR2 xmlOutputInterfaceTree = new XMLWriter4MPR2("CAMPR-interface-output.xml", rootComponent);
 			
 			xmlOutputOriginalComponentTree.writeOriginalComponentTree();
-			xmlOutputInterfaceTree.writeComponentInterfaceTree();
+			xmlOutputInterfaceTree.writeComponentInterfaceTree(GlobalVariable.MPR_SBF_ARVIND);
 		}catch (Exception e){
 			System.err.println(e.getMessage());
 			e.printStackTrace();

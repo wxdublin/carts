@@ -214,7 +214,7 @@ public class Component {
 			this.dMPRInterface.setTheta(0);
 			return 0;
 		}
-		
+
 		int m_prime_min = this.getMin_m_prime();
 		int m_prime_max = this.getMax_m_prime_fast();//fast but not 100% correct!
 		boolean is_interface_feasible = false;
@@ -375,13 +375,20 @@ public class Component {
 		}
 		//transfer the dedicatedCores to full utilization task. These tasks will be abstracted to dedicated cores in the parent component
 		for(int i=0; i<m_dedicatedCores; i++){
-			this.interfaceTaskset.add(new Task(Pi,Pi,Pi));
+			Task interfaceTask = new Task(Pi,Pi,Pi); 
+			interfaceTask.setName("" + interfaceTask.hashCode());
+			this.interfaceTaskset.add(interfaceTask);
 		}
 
 		for(int j=0; j<m_prime-1; j++){
-			this.interfaceTaskset.add(new Task(Pi,Pi,Pi));
+			Task interfaceTask = new Task(Pi,Pi,Pi); 
+			interfaceTask.setName("" + interfaceTask.hashCode());
+			this.interfaceTaskset.add(interfaceTask);
 		}
-		this.interfaceTaskset.add(new Task(Pi, Theta-(m_prime-1)*Pi, Pi));
+		Task interfaceTask = new Task(Pi, Theta-(m_prime-1)*Pi, Pi);
+		interfaceTask.setName("" + interfaceTask.hashCode());
+		this.interfaceTaskset.add(interfaceTask);
+		
 		
 		//Debug: if it's correct to transfer interface to interface task
 		Tool.debug("-----The transfered interface task as Component (" + this.componentName + ")'s workload----- \r\n");

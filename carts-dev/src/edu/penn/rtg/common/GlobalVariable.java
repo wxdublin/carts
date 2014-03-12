@@ -23,6 +23,10 @@ public class GlobalVariable {
 	public static final int HYBRID = 4; 
 	public static final int TASK_CENTRIC_UB = 5; 
 	
+	public static final int MPR_SBF_ARVIND = 101;
+	public static final int MPR_SBF_MENG = 102;
+	
+	
 	//whichSchedTest
 	public static final int ARVIND_SCHEDTEST = 1;
 	public static final int BERTOGNA_SCHEDTEST = 2;
@@ -30,7 +34,7 @@ public class GlobalVariable {
 	public static final int MENG_SCHEDTEST = 4;
 	public static final int MARKO_SCHEDTEST = 5;
 	
-	public static final double AK_MAX_BOUND = 100000 / TIME_PRECISION; // This is estimated according to Ak_max equation. We let denominator greater than 0.1. Becauset this is the time precision we used.
+	public static final double AK_MAX_BOUND = 100000*1 / TIME_PRECISION; // This is estimated according to Ak_max equation. We let denominator greater than 0.1. Becauset this is the time precision we used.
 	public static final int InterfaceInfeasible = -1;
 	
 	public static final int TASK = 1;

@@ -12,15 +12,16 @@ public class Carts {
 		if (args.length >= 1) { // not call GUI
 			if(args[1].toUpperCase().equals("PRM") || args[1].toUpperCase().equals("EDP") || // args[1].toUpperCase().equals("DPRM") ||
 				args[1].toUpperCase().equals("EQV")){
-				CmdAnal.process(args);
+				CmdAnal.process(args); 
 				return;
 			} 
 			
-			if(args[1].toUpperCase().equals("MPR2") || args[1].toUpperCase().equals("MPR")){
+			if(args[1].toUpperCase().equals("MPR2") || args[1].toUpperCase().equals("MPR")
+					|| args[1].toUpperCase().equals("MPR2_MENG") || args[1].toUpperCase().equals("MPR_MENG")){
 				MPR2Analysis.process(args);
 				System.out.println("Process  CSA with MPR2 model finished!");
 				return; 
-			}
+			} 
 			
 			//MPR2hEDF model is based on MPR model. It fixes the interface transformation to Arvind's definition, i.e.,
 			if(args[1].equalsIgnoreCase("DMPR") || args[1].equalsIgnoreCase("MPR2hEDF")){
@@ -45,7 +46,7 @@ public class Carts {
 			
 			
 			System.err.println("Input the wrong resource model!");
-			System.err.println("Only support " + "PRM / EDP / EQV / MPR / DMPR / CADMPR_TASKCENTRIC / CADMPR_MODELCENTRIC / CADMPR_HYBRID" + " resource models" );
+			System.err.println("Only support " + "PRM / EDP / EQV / MPR / MPR_Meng / DMPR / CADMPR_TASKCENTRIC / CADMPR_MODELCENTRIC / CADMPR_HYBRID" + " resource models" );
 				
 		} else { //call GUI
 			jpe.main(args);

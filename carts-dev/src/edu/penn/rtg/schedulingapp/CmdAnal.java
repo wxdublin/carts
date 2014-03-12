@@ -10,7 +10,7 @@ import edu.penn.rtg.schedulingapp.util.CartsProgress;
 public class CmdAnal {
 	public static void process(String[] args) {
 		
-		if (args.length < 3) {
+		if (args.length < 3) { 
 			error();
 		} else {
 			try {
