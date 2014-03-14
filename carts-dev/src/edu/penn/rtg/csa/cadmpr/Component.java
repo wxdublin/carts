@@ -143,21 +143,13 @@ public class Component {
 	public void inflateTaskWCET_onlyVCPUEvent(){
 		if((this.childComponents == null || this.childComponents.isEmpty()) 
 				&& (this.taskset != null && !this.taskset.isEmpty())){ //leaf component with tasks 
-			double delta_crpmd_ecb = 0; //the max crpmd \tau_i can cause in the domain
-			for(int i=0; i<this.taskset.size(); i++){
-				Task currentTask = this.taskset.get(i);
-				if(delta_crpmd_ecb < currentTask.getDelta_crpmd())
-					delta_crpmd_ecb = currentTask.getDelta_crpmd();
-			}
 			for(int i=0; i<this.taskset.size(); i++){
 				Task currentTask = this.taskset.get(i);
 				/*Here is the difference between inflateTaskWCET_taskCentric() */
 				double inflated_exe = currentTask.getExe() 
 						+ currentTask.getDelta_crpmd() * this.getNumberofVCPUPreemptionEvent(currentTask.getPeriod(), GlobalVariable.TASK)
 						+ currentTask.getDelta_crpmd() *  this.getNumberofVCPUFinishEvent(currentTask.getPeriod(), GlobalVariable.TASK);
-				currentTask.setExe(inflated_exe);
-				
-				
+				currentTask.setExe(inflated_exe);	
 			}
 		}else{
 			for(int i=0; i<this.childComponents.size(); i++){
