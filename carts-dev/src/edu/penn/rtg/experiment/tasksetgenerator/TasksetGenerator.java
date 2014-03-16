@@ -83,6 +83,8 @@ public class TasksetGenerator {
 		//taskset utilization range and taskset_num per taskset utilization
 		double task_util_min = 0;//0.002; //same with Jaewoo's RTAS12 paper
 		double task_util_max = 0;
+		/*distribution is the same with paper "
+		 * An Empirical Comparison of Global, Partitioned, and Clustered Multiprocessor EDF Schedulers" */
 		if(args[0].equalsIgnoreCase("Uniform_Light")){
 			whichTasksetUtilDistr = GlobalVariable.UNIFROM_LIGHT;
 			task_util_min = 0.001;//0.002; //same with Jaewoo's RTAS12 paper
@@ -319,7 +321,7 @@ public class TasksetGenerator {
 		double task_util_max = 0;
 		if(args[0].equalsIgnoreCase("Uniform_Light")){
 			whichTasksetUtilDistr = GlobalVariable.UNIFROM_LIGHT;
-			task_util_min = 0.001;//0.002; //same with Jaewoo's RTAS12 paper
+			task_util_min = 0.001;//same with UNC gEDF comparision work. //0.002; //same with Jaewoo's RTAS12 paper
 			task_util_max = 0.1;//0.05;
 		}
 		if(args[0].equalsIgnoreCase("Uniform_Medium")){
@@ -393,7 +395,7 @@ public class TasksetGenerator {
 		str += "Reminder: generateApproach: \r\n0-generate task set in a utilization range \r\n" +
 				"1-generate only ONE task set with assigned util and index \r\n" +
 				"2-generate task set for different task set size\r\n" + 
-				"task's period is (550, 650); (350,850), (100,1000) \r\n";
+				"task's period is (550, 650); (350,850), (100,1100) \r\n";
 		
 		System.out.println(str);
 		
