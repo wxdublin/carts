@@ -153,7 +153,7 @@ public class Component {
 			}
 		}else{
 			for(int i=0; i<this.childComponents.size(); i++){
-				this.childComponents.get(i).inflateTaskWCET_taskCentric();
+				this.childComponents.get(i).inflateTaskWCET_onlyVCPUEvent();
 			}
 		}		
 	}
@@ -361,7 +361,9 @@ public class Component {
 					Tool.write2log("Component name=" + this.componentName  + "\tTheta_i=" + Theta_i + "\t k=" + k + "\t Ak_max=" + Ak_max);
 					for(double Ak = 0; Ak <= Ak_max; Ak += GlobalVariable.TIME_PRECISION){
 						double Dk = workload.get(k).getDeadline();
-						if(this.getDBF(Ak, Dk, m_prime_i, k) > currentInterface.getSBF_CADMPR(Ak+Dk, whichApproach, this)){
+						double demand = this.getDBF(Ak, Dk, m_prime_i, k);
+						double supply = currentInterface.getSBF_CADMPR(Ak+Dk, whichApproach, this);
+						if( demand > supply){
 //							Tool.debug("Component " + this.componentName + " currentInterface (" + currentInterface.getPi() + ", " + 
 //									currentInterface.getTheta() + ", " + currentInterface.getM_prime() + ") \t" +  "check task " + k + "\t" + 
 //									"Ak+Dk:" + (Ak+Dk) + 
@@ -795,7 +797,7 @@ public class Component {
 		double C_total = 0;
 		Vector<Task> workload = this.taskset;
 		if(true)
-			return workload.size()*10 + 1; 
+			return workload.size() * GlobalVariable.MAX_NUMCORES_TO_CHECK_MULTIPLIER; 
 
 		Tool.debug("ComponentName: " + this.componentName + "taskset.size:" + this.taskset.size() + "interfaceTask.size" + this.interfaceTaskset.size() +"\r\n");
 		double diff_di_ci_min = workload.get(0).getDeadline() - workload.get(0).getExe();	//e_i is C_i in Arvind's paper

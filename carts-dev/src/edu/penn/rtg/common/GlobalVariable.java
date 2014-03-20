@@ -44,6 +44,9 @@ public class GlobalVariable {
 	public static final int MENG_IMPL = 2;
 	public static final int IMPL_METHOD = MENG_IMPL; //Implementation method
 	
+	public static final int MAX_NUMCORES_TO_CHECK_MULTIPLIER = 10;
+	public static final int MAX_NUMCORES_TO_CHECK_MULTIPLIER_FOR_BWSAVING = 1; //when count the average BW saving of one approach to the other, use this value.
+	
 	@Override
 	public String toString() {
 		return "GlobalVariable [TIME_PRECISION=" + TIME_PRECISION + "]";

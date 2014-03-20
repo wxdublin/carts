@@ -8,10 +8,11 @@ public class GlobalVariable {
 	public static final int CAMPR2hEDF_TASK_CENTRIC = 1;
 	public static final int CAMPR2hEDF_TASK_CENTRIC_UB = 2;
 	public static final int CAMPR2hEDF_MODEL_CENTRIC = 3;
-	public static final int MPR2 = 4;
-	public static final int MPR2hEDF = 5;
-	public static final int CAMPR2hEDF_COMBINED = 6; 
-	public static final int CAMPR2hEDF_COMBINED_UB = 7;
+	public static final int MPR2 = 4; //MPR with SBF in Arvind's paper
+	public static final int MPR2_Meng = 5; //MPR with SBF in Meng's rtj14 paper
+	public static final int MPR2hEDF = 6;
+	public static final int CAMPR2hEDF_COMBINED = 7; 
+	public static final int CAMPR2hEDF_COMBINED_UB = 8;
 	
 	public static final int BW_SAVE = 1;
 	public static final int BW_LOST = 2;
@@ -20,10 +21,12 @@ public class GlobalVariable {
 	public static final int INTERFACE_INFEASIBLE = -1;
 	public static final int TASKSET_EMPTY = 0;
 	
-	public static final int COMBINED_VS_TASKCENTRIC = 1;
-	public static final int COMBINED_UB_VS_TASKCENTRIC_UB = 2;
-	public static final int TASKCENTRIC_UB_VS_TASKCENTRIC = 3;
-	public static final int DMPR_VS_MPR = 4;
+	public static final int COMBINED_VS_TASKCENTRIC = 11;
+	public static final int COMBINED_UB_VS_TASKCENTRIC_UB = 12;
+	public static final int COMBINED_UB_VS_TASKCENTRIC = 13;
+	public static final int TASKCENTRIC_UB_VS_TASKCENTRIC = 14;
+	public static final int MPR2_Meng_VS_MPR2 = 15;
+	public static final int DMPR_VS_MPR2_Meng = 16;
 	
 	public static final int UNIFROM_LIGHT = 1;
 	public static final int UNIFROM_MEDIUM = 2;

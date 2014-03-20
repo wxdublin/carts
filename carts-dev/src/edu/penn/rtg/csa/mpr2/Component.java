@@ -730,7 +730,7 @@ public class Component {
 		double C_total = 0;
 		Vector<Task> workload = this.taskset;
 		if(true) // control if we use the workload.size() as the m'_max; true if we use workload.size()
-			return workload.size()*20+1; 
+			return workload.size()* GlobalVariable.MAX_NUMCORES_TO_CHECK_MULTIPLIER; 
 
 		Tool.debug("ComponentName: " + this.componentName + "taskset.size:" + this.taskset.size() + "interfaceTask.size" + this.interfaceTaskset.size() +"\r\n");
 		double diff_di_ci_min = workload.get(0).getDeadline() - workload.get(0).getExe();	//e_i is C_i in Arvind's paper
