@@ -37,7 +37,15 @@ public class Carts {
 					|| args[1].equalsIgnoreCase("CAMPR2hEDF_TASKCENTRIC") 
 					|| args[1].equalsIgnoreCase("CAMPR2hEDF_TASKCENTRIC_UB") 
 					|| args[1].equalsIgnoreCase("CAMPR2hEDF_MODELCENTRIC")
-					|| args[1].equalsIgnoreCase("CAMPR2hEDF_HYBRID")){
+					|| args[1].equalsIgnoreCase("CAMPR2hEDF_HYBRID")
+					|| args[1].equalsIgnoreCase("CADMPR_TASKCENTRIC_USEMAXOH")  
+					|| args[1].equalsIgnoreCase("CADMPR_TASKCENTRIC_UB_USEMAXOH") 
+					|| args[1].equalsIgnoreCase("CADMPR_MODELCENTRIC_USEMAXOH")
+					|| args[1].equalsIgnoreCase("CADMPR_HYBRID_USEMAXOH")
+					|| args[1].equalsIgnoreCase("CAMPR2hEDF_TASKCENTRIC_USEMAXOH") 
+					|| args[1].equalsIgnoreCase("CAMPR2hEDF_TASKCENTRIC_UB_USEMAXOH") 
+					|| args[1].equalsIgnoreCase("CAMPR2hEDF_MODELCENTRIC_USEMAXOH")
+					|| args[1].equalsIgnoreCase("CAMPR2hEDF_HYBRID_USEMAXOH")){
 				CADMPRAnalysis.process(args);
 				System.out.println("Process CSA with CADMPR_TASKCENTRIC, or CADMPR_TASKCENTRIC_UB, or CADMPR_MODELCENTRIC (Cache Aware DMPR model with Hybrid global EDF) model finished!");
 				return;

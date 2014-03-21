@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Random;
 import java.util.Vector;
 
 import edu.penn.rtg.common.Tool;
@@ -25,10 +26,16 @@ public class SystemTransformer {
 	public static DecimalFormat fileDF = new DecimalFormat("#.###");
 	public static DecimalFormat df = new DecimalFormat("#.###");
 	
+	public static double OHRATIO_MAX = 0.5;
+	public static double OHRATIO_MIN = 0.0;
+	
+	public static Random randomGenerator = new Random(System.currentTimeMillis());
+	
 	public static double getRandom(){
-		double x = Math.random();
+		double x = randomGenerator.nextDouble();//generate a real number uniformly distributed between 0 and 1.
 		return x;
 	}
+	
 
 	public static void modifyCostOfOverhead(Component component, double ohRatio){
 		if(component.getChildComponents() == null || component.getChildComponents().isEmpty()){ //leaf component
@@ -48,9 +55,28 @@ public class SystemTransformer {
 			}	
 		}
 	}
+	
+	public static void setDifferentCostOfOverhead(Component component){
+		if(component.getChildComponents() == null || component.getChildComponents().isEmpty()){ //leaf component
+			Vector<Task> taskset = component.getTaskset();
+			if(taskset == null || taskset.isEmpty()){
+				return; //no task to change
+			}
+			for(int i = 0; i < taskset.size(); i++){
+				Task task = taskset.get(i);
+				Double delta_crpmd_new = task.getExe() * ( getRandom() * (OHRATIO_MAX - OHRATIO_MIN) );
+				task.setDelta_crpmd(delta_crpmd_new);
+			}
+		}else{
+			for(int i=0; i < component.getChildComponents().size(); i++){
+				Component childComponent = component.getChildComponents().get(i);
+				setDifferentCostOfOverhead(childComponent);
+			}	
+		}
+	}
 
 	public static void varyCostOfOverhead(String rootPath, double tasksetUtil, double ohRatioMin, double ohRatioStep,
-			double ohRatioMax, double tasksetNumPerOhRatio){
+			double ohRatioMax, int tasksetNumPerOhRatio){
 		
 		String topFolder = rootPath + "/" + fileDF.format(ohRatioMin) + "-" + fileDF.format(ohRatioStep) + "-" + fileDF.format(ohRatioMax) + "-" + tasksetNumPerOhRatio;
 		boolean isFolderCreated = (new File(topFolder)).mkdirs();
@@ -73,6 +99,33 @@ public class SystemTransformer {
 				writeXML(outputFilename, rootComponent);
 			}
 		}
+	}
+	
+	public static void setDifferentCostOfOverheadForAllTasksets(String rootPath, double utilMin, 
+			double utilStep, double utilMax, int tasksetNumPerUtil){
+		
+		
+		String topFolder = rootPath + "/" + fileDF.format(utilMin) + "-" + fileDF.format(utilStep) + "-" 
+			+ fileDF.format(utilMax) + "-" + tasksetNumPerUtil;
+		boolean isFolderCreated = (new File(topFolder)).mkdirs();
+		if(!isFolderCreated){System.err.println("Create the folder" + topFolder + "for xml files fails!");}
+		for(double util = utilMin; util < utilMax; util+= utilStep){
+			isFolderCreated = (new File(topFolder + "/" + folderDF.format(util))).mkdirs();
+			if(!isFolderCreated){System.err.println("Create the folder for xml files fails!");}
+			for(int tasksetIndex = 0; tasksetIndex < tasksetNumPerUtil; tasksetIndex++){
+				String inputFilename = rootPath + "/" + "rawData" + "/" + folderDF.format(util) + "/" + tasksetIndex + "-" + fileDF.format(util) + "-in.xml";
+				String outputFilename = topFolder + "/" + folderDF.format(util) + "/"  
+						+ tasksetIndex + "-" + fileDF.format(util) + "-in.xml";			
+				
+				XMLInterpreter4CADMPR xmlInterpreter = new XMLInterpreter4CADMPR(inputFilename); //4 is short for "for"
+				xmlInterpreter.parseFile();
+				Component rootComponent = xmlInterpreter.getRootComponent();
+				
+				setDifferentCostOfOverhead(rootComponent);
+				
+				writeXML(outputFilename, rootComponent);
+			}
+		}
 		
 	}
 	
@@ -87,6 +140,9 @@ public class SystemTransformer {
 		
 		String rootPath_EffectOfOhCost = "workspace-rtsj/effect-costOfCacheOh/4.90";
 		varyCostOfOverhead(rootPath_EffectOfOhCost, 4.90, 0.00, 0.10, 1.00, 25);
+		
+		String rootPath_EffectOfDifferentOh = "workspace-rtsj/effect-differentCostOfCacheOh";
+		setDifferentCostOfOverheadForAllTasksets(rootPath_EffectOfDifferentOh, 0.10, 0.20, 5.00, 25);
 		
 	}
 	

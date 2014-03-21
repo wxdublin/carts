@@ -118,7 +118,7 @@ public class CartsAnalysisThread extends Thread{
 			System.out.println("compute2(): CADMPR_TASKCENTRIC");
 			edu.penn.rtg.csa.cadmpr.Component comp_cadmpr = SchedulingTreeRoot2ComponentRoot.transfer2CADMPRRoot(comp,null);
 			String result_cadmpr_taskcentric = edu.penn.rtg.csa.cadmpr.CADMPRAnalysis.
-					doCADMPRTaskCentricAnalysis(comp_cadmpr, GlobalVariable.TASK_CENTRIC, GlobalVariable.ARVIND_SCHEDTEST_FAST);
+					doCADMPRTaskCentricAnalysis(comp_cadmpr, GlobalVariable.TASK_CENTRIC, GlobalVariable.ARVIND_SCHEDTEST_FAST, false, 0);
 			if(!result_cadmpr_taskcentric.contains("SUCCESS")){
 				JOptionPane.showMessageDialog(null,result_cadmpr_taskcentric,"ERROR!",JOptionPane.ERROR_MESSAGE);
 				return;
@@ -131,7 +131,7 @@ public class CartsAnalysisThread extends Thread{
 			System.out.println("compute2(): CADMPR_MODELCENTRIC");
 			edu.penn.rtg.csa.cadmpr.Component comp_cadmpr = SchedulingTreeRoot2ComponentRoot.transfer2CADMPRRoot(comp,null);
 			String result_cadmpr_modelcentric = edu.penn.rtg.csa.cadmpr.CADMPRAnalysis. 
-					doCADMPRModelCentricAnalysis(comp_cadmpr, GlobalVariable.MODEL_CENTRIC, GlobalVariable.ARVIND_SCHEDTEST_FAST);
+					doCADMPRModelCentricAnalysis(comp_cadmpr, GlobalVariable.MODEL_CENTRIC, GlobalVariable.ARVIND_SCHEDTEST_FAST, false, 0);
 			if(!result_cadmpr_modelcentric.contains("SUCCESS")){
 				JOptionPane.showMessageDialog(null,result_cadmpr_modelcentric,"ERROR!",JOptionPane.ERROR_MESSAGE);
 				return;
@@ -144,7 +144,7 @@ public class CartsAnalysisThread extends Thread{
 			System.out.println("compute2(): CADMPR_HYBRID");
 			edu.penn.rtg.csa.cadmpr.Component comp_cadmpr = SchedulingTreeRoot2ComponentRoot.transfer2CADMPRRoot(comp,null);
 			comp_cadmpr = edu.penn.rtg.csa.cadmpr.CADMPRAnalysis.
-								doCADMPRHybridAnalysis(comp_cadmpr, GlobalVariable.HYBRID, GlobalVariable.ARVIND_SCHEDTEST_FAST);
+								doCADMPRHybridAnalysis(comp_cadmpr, GlobalVariable.HYBRID, GlobalVariable.ARVIND_SCHEDTEST_FAST,false, 0);
 			if(comp_cadmpr.isInterfaceComputed() == false){
 				JOptionPane.showMessageDialog(null,"CADMPR_HYBRID only support hEDF scheduling policy in each component","ERROR!",JOptionPane.ERROR_MESSAGE);
 				return;

@@ -31,21 +31,38 @@ public class CADMPRAnalysis {
 			}
 			System.out.println("Command is:" + args[0] + " " + args[1] + " " + args[2] + " whichSchedTest="+ whichSchedTest);
 			
-			if(args[1].equalsIgnoreCase("CAMPR2hEDF_TASKCENTRIC") || args[1].equalsIgnoreCase("CADMPR_TASKCENTRIC") ){
+			boolean useMaxOh = false;
+			if(args[1].contains("USEMAXOH")){
+				useMaxOh = true;
+			}
+			
+			String resourceModel = "";
+			int whichApproach = -1;
+			if(args[1].equalsIgnoreCase("CAMPR2hEDF_TASKCENTRIC") || args[1].equalsIgnoreCase("CADMPR_TASKCENTRIC")
+					|| args[1].equalsIgnoreCase("CAMPR2hEDF_TASKCENTRIC_USEMAXOH") || args[1].equalsIgnoreCase("CADMPR_TASKCENTRIC_USEMAXOH")){
 				System.out.println("Using Task Centric overhead accounting technique");
-				run(args[0],args[1],args[2],GlobalVariable.TASK_CENTRIC, whichSchedTest);
-			}else if(args[1].equalsIgnoreCase("CAMPR2hEDF_TASKCENTRIC_UB") || args[1].equalsIgnoreCase("CADMPR_TASKCENTRIC_UB") ){
+				resourceModel = "CAMPR2hEDF_TASKCENTRIC";
+				whichApproach = GlobalVariable.TASK_CENTRIC;
+			}else if(args[1].equalsIgnoreCase("CAMPR2hEDF_TASKCENTRIC_UB") || args[1].equalsIgnoreCase("CADMPR_TASKCENTRIC_UB")
+					||args[1].equalsIgnoreCase("CAMPR2hEDF_TASKCENTRIC_UB_USEMAXOH") || args[1].equalsIgnoreCase("CADMPR_TASKCENTRIC_UB_USEMAXOH")){
 				System.out.println("Using Task Centric Upper Bound overhead accounting technique");
-				run(args[0],args[1],args[2],GlobalVariable.TASK_CENTRIC_UB, whichSchedTest);
-			}else if(args[1].equalsIgnoreCase("CAMPR2hEDF_MODELCENTRIC") || args[1].equalsIgnoreCase("CADMPR_MODELCENTRIC")){
+				resourceModel = "CAMPR2hEDF_TASKCENTRIC_UB";
+				whichApproach = GlobalVariable.TASK_CENTRIC_UB;
+			}else if(args[1].equalsIgnoreCase("CAMPR2hEDF_MODELCENTRIC") || args[1].equalsIgnoreCase("CADMPR_MODELCENTRIC")
+					||args[1].equalsIgnoreCase("CAMPR2hEDF_MODELCENTRIC_USEMAXOH") || args[1].equalsIgnoreCase("CADMPR_MODELCENTRIC_USEMAXOH")){
 				System.out.println("Using Model Centric overhead accounting technique");
-				run(args[0],args[1],args[2],GlobalVariable.MODEL_CENTRIC, whichSchedTest);
-			}else if(args[1].equalsIgnoreCase("CADMPR_HYBRID") || args[1].equalsIgnoreCase("CAMPR2hEDF_HYBRID")){
-				run(args[0],args[1],args[2],GlobalVariable.HYBRID, whichSchedTest);
+				resourceModel = "CAMPR2hEDF_MODELCENTRIC";
+				whichApproach = GlobalVariable.MODEL_CENTRIC;
+			}else if(args[1].equalsIgnoreCase("CADMPR_HYBRID") || args[1].equalsIgnoreCase("CAMPR2hEDF_HYBRID")
+					||args[1].equalsIgnoreCase("CADMPR_HYBRID_USEMAXOH") || args[1].equalsIgnoreCase("CAMPR2hEDF_HYBRID_USEMAXOH")){
+				resourceModel = "CADMPR_HYBRID";
+				whichApproach = GlobalVariable.HYBRID;
 			}else{
 				System.out.println("No such analysis approach, please check the analysis approach: " + args[1] + "\r\n exit(1)");
 				System.exit(1);
 			}
+			
+			run(args[0],resourceModel, args[2], whichApproach, whichSchedTest, useMaxOh);
 			
 		}catch(Exception e){
 			e.printStackTrace();
@@ -54,7 +71,7 @@ public class CADMPRAnalysis {
 	}
 	
 	/*Note: CADMPR only supports two level scheduling right now! Although it can run for multiple level scheduling, the result's correctness is not checked!*/
-	public static void run(String inputFilename, String resourceModel, String outputFilename,int whichApproach, int whichSchedTest ){
+	public static void run(String inputFilename, String resourceModel, String outputFilename,int whichApproach, int whichSchedTest, boolean useMaxOh ){
 
 		XMLInterpreter4CADMPR xmlInterpreter = new XMLInterpreter4CADMPR(inputFilename); //4 is short for "for"
 		
@@ -63,13 +80,16 @@ public class CADMPRAnalysis {
 		
 		//reset the crpmd = 1.9ms which is the crpmd cost when task set WSS is 256KB. Only to walk around when delta_crpmd is wrongly set in input xml
 		//rootComponent.resetDelta_crpmd();
-		
+		double maxOh = 0;
+		if(useMaxOh == true){
+			maxOh = rootComponent.getMaxOhInSystem();
+		}
 		
 		switch(whichApproach){
-		case GlobalVariable.TASK_CENTRIC: doCADMPRTaskCentricAnalysis(rootComponent, whichApproach, whichSchedTest); break;
-		case GlobalVariable.TASK_CENTRIC_UB: doCADMPRTaskCentricUBAnalysis(rootComponent, whichApproach, whichSchedTest); break;
-		case GlobalVariable.MODEL_CENTRIC: doCADMPRModelCentricAnalysis(rootComponent, whichApproach, whichSchedTest); break;
-		case GlobalVariable.HYBRID: rootComponent = doCADMPRHybridAnalysis(rootComponent, whichApproach, whichSchedTest); break;
+		case GlobalVariable.TASK_CENTRIC: doCADMPRTaskCentricAnalysis(rootComponent, whichApproach, whichSchedTest, useMaxOh, maxOh); break;
+		case GlobalVariable.TASK_CENTRIC_UB: doCADMPRTaskCentricUBAnalysis(rootComponent, whichApproach, whichSchedTest, useMaxOh, maxOh); break;
+		case GlobalVariable.MODEL_CENTRIC: doCADMPRModelCentricAnalysis(rootComponent, whichApproach, whichSchedTest, useMaxOh, maxOh); break;
+		case GlobalVariable.HYBRID: rootComponent = doCADMPRHybridAnalysis(rootComponent, whichApproach, whichSchedTest, useMaxOh, maxOh); break;
 		default: System.err.println("No such overhead aware MPR analysis approach. Only suport TaskCentri and ModelCentric approach now. Exit(1)"); System.exit(1);
 		}
 				
@@ -102,36 +122,36 @@ public class CADMPRAnalysis {
 		
 	}
 	
-	public static String doCADMPRTaskCentricAnalysis(Component rootComponent, int whichApproach, int whichSchedTest){
+	public static String doCADMPRTaskCentricAnalysis(Component rootComponent, int whichApproach, int whichSchedTest, boolean useMaxOh, double maxOh){
 		String result = checkSchedulingAlgorithm(rootComponent);
-		rootComponent.inflateTaskWCET_taskCentric();
+		rootComponent.inflateTaskWCET_taskCentric(useMaxOh, maxOh);
 		rootComponent.doCSA(whichSchedTest, whichApproach);
 		return result;
 	}
 	
-	public static String doCADMPRTaskCentricUBAnalysis(Component rootComponent, int whichApproach, int whichSchedTest){
+	public static String doCADMPRTaskCentricUBAnalysis(Component rootComponent, int whichApproach, int whichSchedTest, boolean useMaxOh, double maxOh){
 		String result = checkSchedulingAlgorithm(rootComponent);
-		rootComponent.inflateTaskWCETEV1_Bjorn();
+		rootComponent.inflateTaskWCETEV1_Bjorn(useMaxOh, maxOh);
 		rootComponent.doCSA(whichSchedTest, GlobalVariable.TASK_CENTRIC);
 	
 		rootComponent.set_taskcentricUBOnly_interface_and_interfacetasks_for_all_leaf(); //set interface upper bound
 		//clear the dMPRInterface to performance task centric analysis again and compare with the interface upper bound calculated above
 		rootComponent.clear_cadmpr_interface_and_interfacetasks_for_all_nodes();
 		
-		rootComponent.inflateTaskWCET_onlyVCPUEvent();
+		rootComponent.inflateTaskWCET_onlyVCPUEvent(useMaxOh, maxOh);
 		rootComponent.doCSA(whichSchedTest, GlobalVariable.TASK_CENTRIC_UB); /*when compute leaf component, need compare with interface upper bound*/
 		
 		return result; 
 	}
 	
-	public static String doCADMPRModelCentricAnalysis(Component rootComponent, int whichApproach, int whichSchedTest){
+	public static String doCADMPRModelCentricAnalysis(Component rootComponent, int whichApproach, int whichSchedTest,boolean useMaxOh, double maxOh){
 		String result = checkSchedulingAlgorithm(rootComponent);
-		rootComponent.inflateTaskWCETEV1_Bjorn();
+		rootComponent.inflateTaskWCETEV1_Bjorn(useMaxOh, maxOh);
 		rootComponent.doCSA(whichSchedTest, whichApproach);
 		return result;
 	}
 	
-	public static Component doCADMPRHybridAnalysis(Component rootComponent, int whichApproach, int whichSchedTest){
+	public static Component doCADMPRHybridAnalysis(Component rootComponent, int whichApproach, int whichSchedTest,boolean useMaxOh, double maxOh){
 		//check scheduling algorithm, which must be hybrid EDF(i.e., gEDF, hEDF, EDF in input xml)
 		String result_hybrid = checkSchedulingAlgorithm(rootComponent);
 		if(!result_hybrid.contains("SUCCESS")){
@@ -140,10 +160,10 @@ public class CADMPRAnalysis {
 		}
 		
 		Component component_taskcentric = new Component(rootComponent, null);	
-		String result_taskcentric = doCADMPRTaskCentricAnalysis(component_taskcentric,GlobalVariable.TASK_CENTRIC, whichSchedTest );
+		String result_taskcentric = doCADMPRTaskCentricAnalysis(component_taskcentric,GlobalVariable.TASK_CENTRIC, whichSchedTest, useMaxOh, maxOh );
 	
 		Component component_modelcentric = new Component(rootComponent, null);
-		String result_modelcentric = doCADMPRModelCentricAnalysis(component_modelcentric, GlobalVariable.MODEL_CENTRIC, whichSchedTest);
+		String result_modelcentric = doCADMPRModelCentricAnalysis(component_modelcentric, GlobalVariable.MODEL_CENTRIC, whichSchedTest, useMaxOh, maxOh);
 		
 		CADMPR cadmpr_taskcentric = component_taskcentric.getCacheAwareMPRInterface();
 		CADMPR cadmpr_modelcentric = component_modelcentric.getCacheAwareMPRInterface();

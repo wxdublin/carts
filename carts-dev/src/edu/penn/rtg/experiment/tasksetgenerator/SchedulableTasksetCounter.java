@@ -320,13 +320,15 @@ public class SchedulableTasksetCounter {
 									&& interface_TASKCENTRIC.getTheta() > 0){
 								bandwidth_TASKCENTRIC = interface_TASKCENTRIC.getTheta() * 1.0 / interface_TASKCENTRIC.getPi();
 							}else if(interface_TASKCENTRIC.getM_prime() == 0){ // no valid interface, then use the upper bound num of cores in CSA
-								bandwidth_TASKCENTRIC = numberOfTasks_TASKCENTRIC * edu.penn.rtg.common.GlobalVariable.MAX_NUMCORES_TO_CHECK_MULTIPLIER_FOR_BWSAVING;
+								//bandwidth_TASKCENTRIC = numberOfTasks_TASKCENTRIC * edu.penn.rtg.common.GlobalVariable.MAX_NUMCORES_TO_CHECK_MULTIPLIER_FOR_BWSAVING;
+								bandwidth_TASKCENTRIC = -1;
 							}
 							if(interface_COMBINED.getM_prime() > 0 && interface_COMBINED.getPi() > 0 
 									&& interface_COMBINED.getTheta() > 0){
 								bandwidth_COMBINED = interface_COMBINED.getTheta() * 1.0/ interface_COMBINED.getPi();
 							}else if(interface_COMBINED.getM_prime() == 0){
-								bandwidth_COMBINED = numberOfTasks_COMBINED * edu.penn.rtg.common.GlobalVariable.MAX_NUMCORES_TO_CHECK_MULTIPLIER_FOR_BWSAVING;
+								//bandwidth_COMBINED = numberOfTasks_COMBINED * edu.penn.rtg.common.GlobalVariable.MAX_NUMCORES_TO_CHECK_MULTIPLIER_FOR_BWSAVING;
+								bandwidth_COMBINED = -1;
 							}
 							if(bwSaveOrLost[bwSaveOrLostIndex] == GlobalVariable.BW_SAVE &&
 									bandwidth_TASKCENTRIC != -1 && bandwidth_COMBINED != -1){

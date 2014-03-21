@@ -101,6 +101,29 @@ public class Component {
 		
 	}
 	
+	public double getMaxOhInSystem(){
+		if((this.childComponents == null || this.childComponents.isEmpty()) 
+				&& (this.taskset != null && !this.taskset.isEmpty())){
+			double maxOh = 0;
+			for(int i=0; i<this.taskset.size(); i++){
+				Task currentTask = this.taskset.get(i);
+				if(maxOh < currentTask.getDelta_crpmd()){
+					maxOh = currentTask.getDelta_crpmd();
+				}
+			}
+			return maxOh;
+		}else{
+			double maxOh = 0;
+			for(int i=0; i<this.childComponents.size(); i++){
+				double currentOh = this.childComponents.get(i).getMaxOhInSystem();
+				if(maxOh < currentOh){
+					maxOh = currentOh;
+				}
+			}
+			return maxOh;
+		}
+	}
+	
 	/**
 	 * Function inflateTaskWCET_taskCentric(Component component)
 	 * Inflate each task's WCET with *all* cache overhead. 
@@ -108,7 +131,8 @@ public class Component {
 	 * inflate all tasks' WCET with cache overheads in the whole CSA tree
 	 * @see readMe in this package.
 	 */
-	public void inflateTaskWCET_taskCentric(){
+	public void inflateTaskWCET_taskCentric(boolean useMaxOh, double maxOh){
+	
 		if((this.childComponents == null || this.childComponents.isEmpty()) 
 				&& (this.taskset != null && !this.taskset.isEmpty())){ //leaf component with tasks 
 			double delta_crpmd_ecb = 0; //the max crpmd \tau_i can cause in the domain
@@ -119,19 +143,28 @@ public class Component {
 			}
 			for(int i=0; i<this.taskset.size(); i++){
 				Task currentTask = this.taskset.get(i);
-				double inflated_exe = currentTask.getExe() 
-						+ delta_crpmd_ecb
-						+ currentTask.getDelta_crpmd() * this.getNumberofVCPUPreemptionEvent(currentTask.getPeriod(), GlobalVariable.TASK)
-						+ currentTask.getDelta_crpmd() *  this.getNumberofVCPUFinishEvent(currentTask.getPeriod(), GlobalVariable.TASK);
+				double inflated_exe;
+				if(useMaxOh == false){
+					inflated_exe = currentTask.getExe() 
+							+ delta_crpmd_ecb
+							+ currentTask.getDelta_crpmd() * this.getNumberofVCPUPreemptionEvent(currentTask.getPeriod(), GlobalVariable.TASK)
+							+ currentTask.getDelta_crpmd() *  this.getNumberofVCPUFinishEvent(currentTask.getPeriod(), GlobalVariable.TASK);
+				}else{
+					inflated_exe = currentTask.getExe() 
+							+ maxOh
+							+ maxOh * this.getNumberofVCPUPreemptionEvent(currentTask.getPeriod(), GlobalVariable.TASK)
+							+ maxOh *  this.getNumberofVCPUFinishEvent(currentTask.getPeriod(), GlobalVariable.TASK);
+				}
+				
 				currentTask.setExe(inflated_exe);
-				
-				
 			}
 		}else{
 			for(int i=0; i<this.childComponents.size(); i++){
-				this.childComponents.get(i).inflateTaskWCET_taskCentric();
+				this.childComponents.get(i).inflateTaskWCET_taskCentric(useMaxOh, maxOh);
 			}
-		}		
+		}
+
+			
 	}
 	/**
 	 * Function inflateTaskWCET_onlyVCPUEvent(Component component)
@@ -140,20 +173,27 @@ public class Component {
 	 * inflate all tasks' WCET with cache overheads in the whole CSA tree
 	 * @see readMe in this package.
 	 */
-	public void inflateTaskWCET_onlyVCPUEvent(){
+	public void inflateTaskWCET_onlyVCPUEvent(boolean useMaxOh, double maxOh){
 		if((this.childComponents == null || this.childComponents.isEmpty()) 
 				&& (this.taskset != null && !this.taskset.isEmpty())){ //leaf component with tasks 
 			for(int i=0; i<this.taskset.size(); i++){
 				Task currentTask = this.taskset.get(i);
 				/*Here is the difference between inflateTaskWCET_taskCentric() */
-				double inflated_exe = currentTask.getExe() 
-						+ currentTask.getDelta_crpmd() * this.getNumberofVCPUPreemptionEvent(currentTask.getPeriod(), GlobalVariable.TASK)
-						+ currentTask.getDelta_crpmd() *  this.getNumberofVCPUFinishEvent(currentTask.getPeriod(), GlobalVariable.TASK);
+				double inflated_exe;
+				if(useMaxOh == false){
+					inflated_exe = currentTask.getExe() 
+							+ currentTask.getDelta_crpmd() * this.getNumberofVCPUPreemptionEvent(currentTask.getPeriod(), GlobalVariable.TASK)
+							+ currentTask.getDelta_crpmd() *  this.getNumberofVCPUFinishEvent(currentTask.getPeriod(), GlobalVariable.TASK);
+				}else{
+					inflated_exe = currentTask.getExe() 
+							+ maxOh * this.getNumberofVCPUPreemptionEvent(currentTask.getPeriod(), GlobalVariable.TASK)
+							+ maxOh *  this.getNumberofVCPUFinishEvent(currentTask.getPeriod(), GlobalVariable.TASK);
+				}
 				currentTask.setExe(inflated_exe);	
 			}
 		}else{
 			for(int i=0; i<this.childComponents.size(); i++){
-				this.childComponents.get(i).inflateTaskWCET_onlyVCPUEvent();
+				this.childComponents.get(i).inflateTaskWCET_onlyVCPUEvent(useMaxOh, maxOh);
 			}
 		}		
 	}
@@ -164,7 +204,7 @@ public class Component {
 	 * Inflate each task's WCET with *one* cache overhead caused by higher priority task release event.
 	 * This approach uses Bjorn's accounting technique, i.e., inflate higher priority task with one max CRPMD it can causes.
 	 */
-	public void inflateTaskWCETEV1_Bjorn(){
+	public void inflateTaskWCETEV1_Bjorn(boolean useMaxOh, double maxOh){
 		if((this.childComponents == null || this.childComponents.isEmpty()) 
 				&& (this.taskset != null && !this.taskset.isEmpty())){ //leaf component with tasks 
 			double delta_crpmd_ecb = 0; //the max crpmd \tau_i can cause in the domain
@@ -175,12 +215,18 @@ public class Component {
 			}
 			for(int i=0; i<this.taskset.size(); i++){
 				Task currentTask = this.taskset.get(i);
-				double inflated_exe = currentTask.getExe() + delta_crpmd_ecb;
+				double inflated_exe;
+				if(useMaxOh == false){
+					inflated_exe = currentTask.getExe() + delta_crpmd_ecb;
+				}else{
+					inflated_exe = currentTask.getExe() + maxOh;
+				}
+				
 				currentTask.setExe(inflated_exe);			
 			}
 		}else{
 			for(int i=0; i<this.childComponents.size(); i++){
-				this.childComponents.get(i).inflateTaskWCETEV1_Bjorn();
+				this.childComponents.get(i).inflateTaskWCETEV1_Bjorn(useMaxOh, maxOh);
 			}
 		}
 		
