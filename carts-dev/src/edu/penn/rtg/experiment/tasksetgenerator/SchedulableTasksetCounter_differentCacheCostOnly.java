@@ -24,8 +24,12 @@ import edu.penn.rtg.common.Tool;
  * @since 4/19/2013
  *
  */
-public class SchedulableTasksetCounter {
-	public static final int[] whichApproaches = {GlobalVariable.MPR2, GlobalVariable.MPR2_Meng, GlobalVariable.MPR2hEDF, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB, GlobalVariable.CAMPR2hEDF_MODEL_CENTRIC, GlobalVariable.CAMPR2hEDF_COMBINED, GlobalVariable.CAMPR2hEDF_COMBINED_UB};
+public class SchedulableTasksetCounter_differentCacheCostOnly {
+	public static final int[] whichApproaches = {GlobalVariable.MPR2, GlobalVariable.MPR2_Meng, GlobalVariable.MPR2hEDF,
+		GlobalVariable.CAMPR2hEDF_TASK_CENTRIC, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB,
+		GlobalVariable.CAMPR2hEDF_MODEL_CENTRIC, GlobalVariable.CAMPR2hEDF_COMBINED, GlobalVariable.CAMPR2hEDF_COMBINED_UB,
+		GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_USEMAXOH, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB_USEMAXOH, 
+		GlobalVariable.CAMPR2hEDF_MODEL_CENTRIC_USEMAXOH, GlobalVariable.CAMPR2hEDF_COMBINED_USEMAXOH, GlobalVariable.CAMPR2hEDF_COMBINED_UB_USEMAXOH};
 
 //	private double tasksetUtil_min;
 //	private double tasksetUtil_step;
@@ -41,7 +45,7 @@ public class SchedulableTasksetCounter {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		if(args.length < 2){
-			SchedulableTasksetCounter.printUsage();
+			SchedulableTasksetCounter_differentCacheCostOnly.printUsage();
 			System.exit(0);
 		}
 		
@@ -64,13 +68,13 @@ public class SchedulableTasksetCounter {
 		
 		System.out.println("Input params: tasksetUtil (" + tasksetUtil_min + "," 
 					+ tasksetUtil_step + ", " + tasksetUtil_max +") tasksetNum_perUtil" + tasksetNum_perUtil + "\r\n");
-		SchedulableTasksetCounter.countAverageBandwidth(rootPath, tasksetUtil_min, tasksetUtil_step,
+//		SchedulableTasksetCounter_differentCacheCostOnly.countAverageBandwidth(rootPath, tasksetUtil_min, tasksetUtil_step,
+//				tasksetUtil_max, tasksetNum_perUtil);
+		SchedulableTasksetCounter_differentCacheCostOnly.countEachTaskBandwidth(rootPath, tasksetUtil_min, tasksetUtil_step,
 				tasksetUtil_max, tasksetNum_perUtil);
-		SchedulableTasksetCounter.countEachTaskBandwidth(rootPath, tasksetUtil_min, tasksetUtil_step,
-				tasksetUtil_max, tasksetNum_perUtil);
-		SchedulableTasksetCounter.countSchedulableTasksetRatio(rootPath, tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil, physicalCoreNum);
-		SchedulableTasksetCounter.countAverageBandwidthSaving(rootPath, tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil);
-		SchedulableTasksetCounter.countEachTasksetBandwidthSaving(rootPath, tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil);
+//		SchedulableTasksetCounter_differentCacheCostOnly.countSchedulableTasksetRatio(rootPath, tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil, physicalCoreNum);
+//		SchedulableTasksetCounter_differentCacheCostOnly.countAverageBandwidthSaving(rootPath, tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil);
+//		SchedulableTasksetCounter_differentCacheCostOnly.countEachTasksetBandwidthSaving(rootPath, tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil);
 	}
 	
 	private static void printUsage(){
@@ -108,31 +112,31 @@ public class SchedulableTasksetCounter {
 						+ df.format(tasksetUtil_min) + "-" + df.format(tasksetUtil_step) + "-" 
 						+df.format(tasksetUtil_max) + "-" + tasksetNum_perUtil + "-"; 
 				
-				SchedulableTasksetCounter counter_TASKCENTRIC = null; //baseline
-				SchedulableTasksetCounter counter_COMBINED = null; // our proposed approach to compare
+				SchedulableTasksetCounter_differentCacheCostOnly counter_TASKCENTRIC = null; //baseline
+				SchedulableTasksetCounter_differentCacheCostOnly counter_COMBINED = null; // our proposed approach to compare
 				if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_VS_TASKCENTRIC){
-					counter_TASKCENTRIC = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
-					counter_COMBINED = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_COMBINED);
+					counter_TASKCENTRIC = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
+					counter_COMBINED = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_COMBINED);
 					outputFilename += bandwidthSaveLostStr+ "-COMBINED-vs-TASKCENTRIC.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_UB_VS_TASKCENTRIC_UB){
-					counter_TASKCENTRIC = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
-					counter_COMBINED = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_COMBINED_UB);
+					counter_TASKCENTRIC = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
+					counter_COMBINED = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_COMBINED_UB);
 					outputFilename += bandwidthSaveLostStr + "-COMBINED_UB-vs-TASKCENTRIC_UB.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_UB_VS_TASKCENTRIC){
-					counter_TASKCENTRIC = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
-					counter_COMBINED = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_COMBINED_UB);
+					counter_TASKCENTRIC = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
+					counter_COMBINED = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_COMBINED_UB);
 					outputFilename += bandwidthSaveLostStr + "-COMBINED_UB-vs-TASKCENTRIC.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.TASKCENTRIC_UB_VS_TASKCENTRIC){
-					counter_TASKCENTRIC = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
-					counter_COMBINED = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
+					counter_TASKCENTRIC = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
+					counter_COMBINED = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
 					outputFilename += bandwidthSaveLostStr + "-TASKCENTRIC_UB-vs-TASKCENTRIC.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.MPR2_Meng_VS_MPR2){
-					counter_TASKCENTRIC = new SchedulableTasksetCounter(rootPath, GlobalVariable.MPR2);
-					counter_COMBINED = new SchedulableTasksetCounter(rootPath,GlobalVariable.MPR2_Meng);
+					counter_TASKCENTRIC = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.MPR2);
+					counter_COMBINED = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath,GlobalVariable.MPR2_Meng);
 					outputFilename += bandwidthSaveLostStr + "-MPR2_Meng-vs-MPR2.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.DMPR_VS_MPR2_Meng){
-					counter_TASKCENTRIC = new SchedulableTasksetCounter(rootPath, GlobalVariable.MPR2_Meng);
-					counter_COMBINED = new SchedulableTasksetCounter(rootPath,GlobalVariable.MPR2hEDF);
+					counter_TASKCENTRIC = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.MPR2_Meng);
+					counter_COMBINED = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath,GlobalVariable.MPR2hEDF);
 					outputFilename += bandwidthSaveLostStr + "-DMPR-vs-MPR2_Meng.stat";
 				}else{
 					System.err.println("ERROR: Now can only compare COMBINED_VS_TASKCENTRIC, COMBINED_UB_VS_TASKCENTRIC_UB and DMPR_VS_MPR2_Meng, MPR2_Meng_VS_MPR2");
@@ -259,32 +263,32 @@ public class SchedulableTasksetCounter {
 						+ df.format(tasksetUtil_min) + "-" + df.format(tasksetUtil_step) + "-" 
 						+df.format(tasksetUtil_max) + "-" + tasksetNum_perUtil + "-"; 
 				
-				SchedulableTasksetCounter counter_TASKCENTRIC = null; //BASELINE APPROACH
-				SchedulableTasksetCounter counter_COMBINED = null; // OUR PROPOSED APPROACH TO COMPARE
+				SchedulableTasksetCounter_differentCacheCostOnly counter_TASKCENTRIC = null; //BASELINE APPROACH
+				SchedulableTasksetCounter_differentCacheCostOnly counter_COMBINED = null; // OUR PROPOSED APPROACH TO COMPARE
 				
 				if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_VS_TASKCENTRIC){
-					counter_TASKCENTRIC = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
-					counter_COMBINED = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_COMBINED);
+					counter_TASKCENTRIC = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
+					counter_COMBINED = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_COMBINED);
 					outputFilename += bandwidthSaveLostStr + "-COMBINED-vs-TASKCENTRIC.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_UB_VS_TASKCENTRIC_UB){
-					counter_TASKCENTRIC = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
-					counter_COMBINED = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_COMBINED_UB);
+					counter_TASKCENTRIC = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
+					counter_COMBINED = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_COMBINED_UB);
 					outputFilename += bandwidthSaveLostStr + "-COMBINED_UB-vs-TASKCENTRIC_UB.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.COMBINED_UB_VS_TASKCENTRIC){
-					counter_TASKCENTRIC = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
-					counter_COMBINED = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_COMBINED_UB);
+					counter_TASKCENTRIC = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
+					counter_COMBINED = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_COMBINED_UB);
 					outputFilename += bandwidthSaveLostStr + "-COMBINED_UB-vs-TASKCENTRIC.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.TASKCENTRIC_UB_VS_TASKCENTRIC){
-					counter_TASKCENTRIC = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
-					counter_COMBINED = new SchedulableTasksetCounter(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
+					counter_TASKCENTRIC = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC);
+					counter_COMBINED = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB);
 					outputFilename += bandwidthSaveLostStr + "-TASKCENTRIC_UB-vs-TASKCENTRIC.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.MPR2_Meng_VS_MPR2){
-					counter_TASKCENTRIC = new SchedulableTasksetCounter(rootPath, GlobalVariable.MPR2);
-					counter_COMBINED = new SchedulableTasksetCounter(rootPath, GlobalVariable.MPR2_Meng);
+					counter_TASKCENTRIC = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.MPR2);
+					counter_COMBINED = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.MPR2_Meng);
 					outputFilename += bandwidthSaveLostStr + "-MPR2_Meng-vs-MPR2.stat";
 				}else if(groupsBandwidthSaving[i] == GlobalVariable.DMPR_VS_MPR2_Meng){
-					counter_TASKCENTRIC = new SchedulableTasksetCounter(rootPath, GlobalVariable.MPR2_Meng);
-					counter_COMBINED = new SchedulableTasksetCounter(rootPath, GlobalVariable.MPR2hEDF);
+					counter_TASKCENTRIC = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.MPR2_Meng);
+					counter_COMBINED = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, GlobalVariable.MPR2hEDF);
 					outputFilename += bandwidthSaveLostStr + "-DMPR-vs-MPR2_Meng.stat";
 				}else{
 					System.err.println("ERROR: countAverageBandwidthSaving(). No such comparison");
@@ -419,7 +423,7 @@ public class SchedulableTasksetCounter {
 		
 		for(int i=0; i<whichApproaches.length; i++){
 			int whichApproach = whichApproaches[i];
-			SchedulableTasksetCounter counter = new SchedulableTasksetCounter(rootPath, whichApproach);
+			SchedulableTasksetCounter_differentCacheCostOnly counter = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, whichApproach);
 			counter.parseInterfaces(tasksetUtil_min,tasksetUtil_step,tasksetUtil_max,tasksetNum_perUtil);
 			counter.writeSchedulableTasksetRatioPerUtil(tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil, physicalCoreNum);
 		}
@@ -440,7 +444,7 @@ public class SchedulableTasksetCounter {
 		
 		for(int i=0; i<whichApproaches.length; i++){
 			int whichApproach = whichApproaches[i];
-			SchedulableTasksetCounter counter = new SchedulableTasksetCounter(rootPath, whichApproach);
+			SchedulableTasksetCounter_differentCacheCostOnly counter = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, whichApproach);
 			counter.parseInterfaces(tasksetUtil_min,tasksetUtil_step,tasksetUtil_max,tasksetNum_perUtil);
 			counter.writeAverageBandwidthPerUtil(tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil);
 		}
@@ -459,7 +463,7 @@ public class SchedulableTasksetCounter {
 		
 		for(int i=0; i<whichApproaches.length; i++){
 			int whichApproach = whichApproaches[i];
-			SchedulableTasksetCounter counter = new SchedulableTasksetCounter(rootPath, whichApproach);
+			SchedulableTasksetCounter_differentCacheCostOnly counter = new SchedulableTasksetCounter_differentCacheCostOnly(rootPath, whichApproach);
 			counter.parseInterfaces(tasksetUtil_min,tasksetUtil_step,tasksetUtil_max,tasksetNum_perUtil);
 			counter.writeEachTasksetBandwidth(tasksetUtil_min, tasksetUtil_step, tasksetUtil_max, tasksetNum_perUtil);
 		}
@@ -479,6 +483,11 @@ public class SchedulableTasksetCounter {
 		case GlobalVariable.CAMPR2hEDF_MODEL_CENTRIC: outputFilename += "CAMPR2hEDF_MODELCENTRIC-EachTasksetBandwidth.stat"; break;
 		case GlobalVariable.CAMPR2hEDF_COMBINED: outputFilename += "CAMPR2hEDF_COMBINED-EachTasksetBandwidth.stat"; break;
 		case GlobalVariable.CAMPR2hEDF_COMBINED_UB: outputFilename += "CAMPR2hEDF_COMBINED_UB-EachTasksetBandwidth.stat"; break;
+		case GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_USEMAXOH: outputFilename += "CAMPR2hEDF_TASKCENTRIC_USEMAXOH-EachTasksetBandwidth.stat"; break;
+		case GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB_USEMAXOH: outputFilename += "CAMPR2hEDF_TASKCENTRIC_UB_USEMAXOH-EachTasksetBandwidth.stat"; break;
+		case GlobalVariable.CAMPR2hEDF_MODEL_CENTRIC_USEMAXOH: outputFilename += "CAMPR2hEDF_MODELCENTRIC_USEMAXOH-EachTasksetBandwidth.stat"; break;
+		case GlobalVariable.CAMPR2hEDF_COMBINED_USEMAXOH: outputFilename += "CAMPR2hEDF_COMBINED_USEMAXOH-EachTasksetBandwidth.stat"; break;
+		case GlobalVariable.CAMPR2hEDF_COMBINED_UB_USEMAXOH: outputFilename += "CAMPR2hEDF_COMBINED_UB_USEMAXOH-EachTasksetBandwidth.stat"; break;
 		case GlobalVariable.MPR2: outputFilename += "MPR2-EachTasksetBandwidth.stat"; break;
 		case GlobalVariable.MPR2_Meng: outputFilename += "MPR2_Meng-EachTasksetBandwidth.stat"; break;
 		case GlobalVariable.MPR2hEDF: outputFilename += "MPR2hEDF-EachTasksetBandwidth.stat"; break;
@@ -676,6 +685,11 @@ public class SchedulableTasksetCounter {
 				case GlobalVariable.CAMPR2hEDF_MODEL_CENTRIC: inputFilename += "CAMPR2hEDF_MODELCENTRIC-out.xml"; break;
 				case GlobalVariable.CAMPR2hEDF_COMBINED: inputFilename += "CAMPR2hEDF_COMBINED-out.xml"; break;
 				case GlobalVariable.CAMPR2hEDF_COMBINED_UB: inputFilename += "CAMPR2hEDF_COMBINED_UB-out.xml"; break;
+				case GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_USEMAXOH: inputFilename += "CAMPR2hEDF_TASKCENTRIC_USEMAXOH-out.xml"; break;
+				case GlobalVariable.CAMPR2hEDF_TASK_CENTRIC_UB_USEMAXOH: inputFilename += "CAMPR2hEDF_TASKCENTRIC_UB_USEMAXOH-out.xml"; break;
+				case GlobalVariable.CAMPR2hEDF_MODEL_CENTRIC_USEMAXOH: inputFilename += "CAMPR2hEDF_MODELCENTRIC_USEMAXOH-out.xml"; break;
+				case GlobalVariable.CAMPR2hEDF_COMBINED_USEMAXOH: inputFilename += "CAMPR2hEDF_COMBINED_USEMAXOH-out.xml"; break;
+				case GlobalVariable.CAMPR2hEDF_COMBINED_UB_USEMAXOH: inputFilename += "CAMPR2hEDF_COMBINED_UB_USEMAXOH-out.xml"; break;
 				case GlobalVariable.MPR2: inputFilename += "MPR2-out.xml"; break;
 				case GlobalVariable.MPR2_Meng: inputFilename += "MPR2_Meng-out.xml"; break;
 				case GlobalVariable.MPR2hEDF: inputFilename += "MPR2hEDF-out.xml"; break;
@@ -714,7 +728,7 @@ public class SchedulableTasksetCounter {
 	 * Construct function
 	 * @param whichApproach is defined in the GlobalVariable class in the same package
 	 */
-	public SchedulableTasksetCounter(String rootPath, int whichApproach){
+	public SchedulableTasksetCounter_differentCacheCostOnly(String rootPath, int whichApproach){
 		this.whichApproach = whichApproach;
 		this.mPRInterfaces = new Vector<Vector<MPRInterface>>();
 		this.rootPath = rootPath;

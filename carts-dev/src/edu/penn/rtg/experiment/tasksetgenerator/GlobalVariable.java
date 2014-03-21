@@ -5,14 +5,22 @@ public class GlobalVariable {
 	public static final long MAX_NUMBER = 2047483647; //9223372036854775807;//largest number of long type in java. 32 bit
 	public static final double ONE_TIME_UNIT = Math.pow(0.1,6);
 	
-	public static final int CAMPR2hEDF_TASK_CENTRIC = 1;
-	public static final int CAMPR2hEDF_TASK_CENTRIC_UB = 2;
-	public static final int CAMPR2hEDF_MODEL_CENTRIC = 3;
-	public static final int MPR2 = 4; //MPR with SBF in Arvind's paper
-	public static final int MPR2_Meng = 5; //MPR with SBF in Meng's rtj14 paper
-	public static final int MPR2hEDF = 6;
+	public static final int MPR2 = 1; //MPR with SBF in Arvind's paper
+	public static final int MPR2_Meng = 2; //MPR with SBF in Meng's rtj14 paper
+	public static final int MPR2hEDF = 3;
+	public static final int CAMPR2hEDF_TASK_CENTRIC = 4;
+	public static final int CAMPR2hEDF_TASK_CENTRIC_UB = 5;
+	public static final int CAMPR2hEDF_MODEL_CENTRIC = 6;
 	public static final int CAMPR2hEDF_COMBINED = 7; 
 	public static final int CAMPR2hEDF_COMBINED_UB = 8;
+	public static final int CAMPR2hEDF_TASK_CENTRIC_USEMAXOH = 9;
+	public static final int CAMPR2hEDF_TASK_CENTRIC_UB_USEMAXOH = 10;
+	public static final int CAMPR2hEDF_MODEL_CENTRIC_USEMAXOH = 11;
+	public static final int CAMPR2hEDF_COMBINED_USEMAXOH = 12; 
+	public static final int CAMPR2hEDF_COMBINED_UB_USEMAXOH = 13;
+
+
+
 	
 	public static final int BW_SAVE = 1;
 	public static final int BW_LOST = 2;
