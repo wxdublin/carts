@@ -27,7 +27,8 @@ public class RTXenTaskScriptGenerator {
 	public static int DURATION  = 60; //second
 	public static int DURATION_AFTER_FINISH = 20; //second
 	
-	public static void generateTaskScript4RTXen(String rootPath, String inputFilename){
+	public static void generateTaskScript4RTXen(String rootPath, String inputfile_prefix, String CSA_model){
+		String inputFilename = inputfile_prefix + "-in.xml";
 		String tasksetFilepath = rootPath + "/" + inputFilename;
 		XMLInterpreter4CADMPR xmlInterpreter = new XMLInterpreter4CADMPR(tasksetFilepath); //4 is short for "for"
 		xmlInterpreter.parseFile();
@@ -36,30 +37,31 @@ public class RTXenTaskScriptGenerator {
 		for(int i=0; i<rootComponent.getChildComponents().size(); i++){
 			Component childComponent = rootComponent.getChildComponents().get(i);
 			String scriptPerComponent = "";
-			scriptPerComponent += "chmod a+x ./st_trace\r\n"
-								+ "./st_trace " + inputFilename + "_Dom" + i + " &\r\n" 
-								+ "sleep 5\r\n"
-								+ "./cpu_busy &\r\n"; //cpu_busy to get periodic server
+			scriptPerComponent += "chmod a+x ./st_trace\n"
+								+ "./st_trace " + inputfile_prefix + "-dom" + (i+1) + "-out &\n" 
+								+ "sleep 5\n"
+								+ "./cpu_busy &\n"; //cpu_busy to get periodic server
 			
 			for(int j=0; j < childComponent.getTaskset().size(); j++){
 				Task task = childComponent.getTaskset().get(j);
 				scriptPerComponent += "./base_task_cache " + task.getPeriod() + " " + task.getExe() + " " 
-							+ CACHE_SIZE_KB + " " + DURATION + "&\r\n"; 
+							+ CACHE_SIZE_KB + " " + DURATION + "&\n"; 
 			}
-			scriptPerComponent += "sleep " + DURATION + "\r\n"
-								+ "sleep " + DURATION_AFTER_FINISH + "\r\n"
-								+ "mv * /root/rtsj14/\r\n"
-								+ "echo -n \"Dom_" + i + " finish at \"\r\n"
+			scriptPerComponent += "sleep " + DURATION + "\n"
+								+ "sleep " + DURATION_AFTER_FINISH + "\n"
+								+ "mkdir /root/rtsj14/\n"
+								+ "mv * /root/rtsj14/\n"
+								+ "echo -n \"Dom-" + (i+1) + " finish at \"\n"
 								+ "date";
-			String scriptOutputFilename = rootPath + "/" + inputFilename + "_Dom" + i +".sh";
+			String scriptOutputFilename = rootPath + "/" + inputfile_prefix + "-" + CSA_model + "-Dom" + (i+1) +"-out.sh";
 			try{
 				BufferedWriter scriptOutputFile = new BufferedWriter(new FileWriter(scriptOutputFilename, false));
 				scriptOutputFile.write(scriptPerComponent);
 				scriptOutputFile.flush();
 				System.out.println(scriptPerComponent);
 			}catch (IOException e){
-				System.err.println("GenerateTaskset: open output_xmlFile fails. file name: " + scriptOutputFilename + "\r\n");
-				Tool.write2log("GenerateTaskset: open output_xmlFile fails. file name: " + scriptOutputFilename + "\r\n");
+				System.err.println("GenerateTaskset: open output_xmlFile fails. file name: " + scriptOutputFilename + "\n");
+				Tool.write2log("GenerateTaskset: open output_xmlFile fails. file name: " + scriptOutputFilename + "\n");
 			}
 			
 		}
@@ -72,9 +74,11 @@ public class RTXenTaskScriptGenerator {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		String rootPath = args[0];
-		String inputFilename = args[1];
+		String inputfile_prefix = args[1];
+		String CSA_model = args[2];
 		
-		generateTaskScript4RTXen(rootPath, inputFilename);
+		
+		generateTaskScript4RTXen(rootPath, inputfile_prefix, CSA_model);
 		
 
 		
