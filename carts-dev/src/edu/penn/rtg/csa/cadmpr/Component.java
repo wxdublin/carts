@@ -626,10 +626,13 @@ public class Component {
 			this.interfaceTaskset.add(new Task(Pi,Pi,Pi));
 		}
 
-		for(int j=0; j<m_prime-1; j++){
-			this.interfaceTaskset.add(new Task(Pi,Pi,Pi));
+		if(m_prime > 0 && Theta > (m_prime-1)*Pi){
+			for(int j=0; j<m_prime-1; j++){
+				this.interfaceTaskset.add(new Task(Pi,Pi,Pi));
+			}
+			this.interfaceTaskset.add(new Task(Pi, Theta-(m_prime-1)*Pi, Pi));
 		}
-		this.interfaceTaskset.add(new Task(Pi, Theta-(m_prime-1)*Pi, Pi));
+		
 		
 		//Debug: if it's correct to transfer interface to interface task
 		Tool.debug("-----The transfered interface task as Component (" + this.componentName + ")'s workload----- \r\n");

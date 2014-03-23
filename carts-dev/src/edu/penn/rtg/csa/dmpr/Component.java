@@ -377,14 +377,18 @@ public class Component {
 			this.interfaceTaskset.add(interfaceTask);
 		}
 
-		for(int j=0; j<m_prime-1; j++){
-			Task interfaceTask = new Task(Pi,Pi,Pi); 
+		if( m_prime > 0 && Theta > (m_prime-1)*Pi){
+			for(int j=0; j<m_prime-1; j++){
+				Task interfaceTask = new Task(Pi,Pi,Pi); 
+				interfaceTask.setName("" + interfaceTask.hashCode());
+				this.interfaceTaskset.add(interfaceTask);
+			}
+			Task interfaceTask = new Task(Pi, Theta-(m_prime-1)*Pi, Pi);
 			interfaceTask.setName("" + interfaceTask.hashCode());
 			this.interfaceTaskset.add(interfaceTask);
 		}
-		Task interfaceTask = new Task(Pi, Theta-(m_prime-1)*Pi, Pi);
-		interfaceTask.setName("" + interfaceTask.hashCode());
-		this.interfaceTaskset.add(interfaceTask);
+	
+	
 		
 		
 		//Debug: if it's correct to transfer interface to interface task
