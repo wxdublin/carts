@@ -615,15 +615,12 @@ public class Component {
 		int m_prime = currentInterface.getM_prime();
 		int m_dedicatedCores = currentInterface.getM_dedicatedCores();
 		
-		if(Theta < 0 || Theta > m_prime*Pi){ // invalid interface!
+		if(Theta < (m_prime-1)*Pi || Theta > m_prime*Pi){ // invalid interface!
 			this.interfaceTaskset.add(new Task(Pi,GlobalVariable.MAX_INTEGER,Pi));
 			Tool.debug("Invalid Interface of Component" + this.componentName + "\r\n");
 			return 1;
 		}
-		if(Theta == 0){
-			this.interfaceTaskset.clear();
-			return 0;
-		}
+		
 		//transfer the dedicatedCores to full utilization task. These tasks will be abstracted to dedicated cores in the parent component
 		for(int i=0; i<m_dedicatedCores; i++){
 			this.interfaceTaskset.add(new Task(Pi,Pi,Pi));
