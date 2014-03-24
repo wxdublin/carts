@@ -24,7 +24,7 @@ public class RTXenTaskScriptGenerator {
 	
 
 	public static int CACHE_SIZE_KB = 256;
-	public static int DURATION  = 60; //second
+	public static int DURATION  = 600; //second
 	public static int DURATION_AFTER_FINISH = 20; //second
 	
 	public static void generateTaskScript4RTXen(String rootPath, String inputfile_prefix, String CSA_model){
@@ -38,7 +38,7 @@ public class RTXenTaskScriptGenerator {
 			Component childComponent = rootComponent.getChildComponents().get(i);
 			String scriptPerComponent = "";
 			scriptPerComponent += "chmod a+x ./st_trace\n"
-								+ "./st_trace " + inputfile_prefix + "-dom" + (i+1) + "-out &\n" 
+								+ "./st_trace " + inputfile_prefix + "-" + CSA_model + "-dom" + (i+1) + "-out &\n" 
 								+ "sleep 5\n"
 								+ "./cpu_busy &\n"; //cpu_busy to get periodic server
 			
