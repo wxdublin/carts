@@ -785,7 +785,7 @@ public class SchedulableTasksetCounter_differentCacheCostOnly {
 					return 0.0;
 				}else{
 					System.err.println("File " + inputTasksetFilename + " not exist. Should Not happen! exit");
-					System.exit(1);
+					return -100.0;//work around. No use for the result in the paper
 				}
 			}
 			

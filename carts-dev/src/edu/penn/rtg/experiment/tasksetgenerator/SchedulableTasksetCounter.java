@@ -8,10 +8,11 @@ import java.io.FileWriter;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Vector;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import edu.penn.rtg.common.Tool;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * Class SchedulableTasksetCounter
