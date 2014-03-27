@@ -2,7 +2,6 @@ package edu.penn.rtg.csa.mpr2;
 
 import java.util.*;
 
-
 import edu.penn.rtg.common.*;
 
 /**
@@ -699,8 +698,9 @@ public class Component {
 				&& AkMax > GlobalVariable.AK_MAX_BOUND){ //If it's not fast, just abandon the result for this task set!
 			Tool.write2Aklog("MPR2\t" + this.componentFilename + "\t Arvind_SchedTest/Meng_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! system exit. Not compute interface for this task set\r\n");
 			Tool.debug("MPR2\t" + this.componentFilename + "\t Arvind_SchedTest/Meng_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! system exit. Not compute interface for this task set\r\n");
-			System.err.println("MPR2\t" + this.componentFilename + "\t Arvind_SchedTest/Meng_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! system exit. Not compute interface for this task set\r\n");
-			System.exit(1);
+			System.err.println("MPR2\t" + this.componentFilename + "\t Arvind_SchedTest/Meng_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! Computation is very slow.\r\n");
+			return GlobalVariable.InterfaceInfeasible;
+			//System.exit(1);
 		}
 
 		if(whichSchedTest == GlobalVariable.ARVIND_SCHEDTEST_FAST  //if it's Fast calculation, then it just skip this Theta and try the next theta
