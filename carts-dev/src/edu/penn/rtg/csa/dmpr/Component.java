@@ -183,7 +183,7 @@ public class Component {
 		}while(true); //search m_prime_i
 		//The last feasibleInterface is the min bandwidth interface! 
 		
-		if(feasibleInterface.getTheta() < 0 ){// no feasible interface!
+		if(feasibleInterface.getTheta() <= 0 ){// no feasible interface!
 			feasibleInterface.setTheta(GlobalVariable.MAX_INTEGER);
 		}
 		this.dMPRInterface = feasibleInterface;

@@ -92,7 +92,7 @@ public class CADMPR {
 	public CADMPR() {
 		
 		this.Pi = -1;
-		this.Theta = 0;
+		this.Theta = -1;
 		this.m_prime = 0;
 		this.m_dedicatedCores = 0;
 	}

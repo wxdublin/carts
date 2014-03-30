@@ -177,7 +177,7 @@ public class SchedulableTasksetCounter_differentCacheCostOnly {
 							}
 							if(bwSaveOrLost[bwSaveOrLostIndex] == GlobalVariable.BW_SAVE && 
 									bandwidth_TASKCENTRIC != -1 && bandwidth_COMBINED != -1){
-								if(bandwidth_COMBINED < bandwidth_TASKCENTRIC){
+								if(bandwidth_COMBINED <= bandwidth_TASKCENTRIC){
 									str += df.format(util) + "\t" + df.format(index)+"\t" + (bandwidth_TASKCENTRIC-bandwidth_COMBINED)+ "\r\n";
 								}
 							/*	else{ //when taskcentric bandwidth is invalid, all bandwidth calculated by combied is saved resource 

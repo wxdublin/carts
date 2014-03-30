@@ -29,7 +29,9 @@ public class SystemTransformer {
 	public static double OHRATIO_MAX = 0.5;
 	public static double OHRATIO_MIN = 0.0;
 	
-	public static Random randomGenerator = new Random(System.currentTimeMillis());
+	public static int rootComponentPeriod = 32;
+	
+	public static Random randomGenerator = new Random(0);
 	
 	public static double getRandom(){
 		double x = randomGenerator.nextDouble();//generate a real number uniformly distributed between 0 and 1.
@@ -129,6 +131,30 @@ public class SystemTransformer {
 		
 	}
 	
+	public static void putTasksIntoOneComponnet(String rootPath, double utilMin, double utilStep, double utilMax, int tasksetNumPerUtil){
+		String topFolderIn = rootPath + "/effect-taskset-util=(0.10-0.20-24.00)" + "/" + fileDF.format(utilMin) + "-" + fileDF.format(utilStep) + "-" 
+				+ fileDF.format(utilMax) + "-" + tasksetNumPerUtil;
+		String topFolderOut = rootPath + "/one-component-taskset-util=(0.10-0.20-24.00)-period=" + rootComponentPeriod + "/" + fileDF.format(utilMin) + "-" + fileDF.format(utilStep) + "-" 
+				+ fileDF.format(utilMax) + "-" + tasksetNumPerUtil;
+			boolean isFolderCreated = (new File(topFolderOut)).mkdirs();
+			if(!isFolderCreated){System.err.println("Create the folder" + topFolderOut + "for xml files fails!");}
+			for(double util = utilMin; util < utilMax; util+= utilStep){
+				isFolderCreated = (new File(topFolderOut + "/" + folderDF.format(util))).mkdirs();
+				if(!isFolderCreated){System.err.println("Create the folder for xml files fails!");}
+				for(int tasksetIndex = 0; tasksetIndex < tasksetNumPerUtil; tasksetIndex++){
+					String inputFilename = topFolderIn + "/" + folderDF.format(util) + "/" + tasksetIndex + "-" + fileDF.format(util) + "-in.xml";
+					String outputFilename = topFolderOut + "/" + folderDF.format(util) + "/"  
+							+ tasksetIndex + "-" + fileDF.format(util) + "-in.xml";			
+					
+					XMLInterpreter4CADMPR xmlInterpreter = new XMLInterpreter4CADMPR(inputFilename); //4 is short for "for"
+					xmlInterpreter.parseFile();
+					Component rootComponent = xmlInterpreter.getRootComponent();
+					
+					writeXML2OneComponent(outputFilename, rootComponent);
+				}
+			}
+	}
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		folderDF.setMaximumFractionDigits(2);
@@ -138,11 +164,20 @@ public class SystemTransformer {
 		df.setMaximumFractionDigits(2);
 		df.setMinimumFractionDigits(2);
 		
-		String rootPath_EffectOfOhCost = "workspace-rtsj/effect-costOfCacheOh/4.90";
-		varyCostOfOverhead(rootPath_EffectOfOhCost, 4.90, 0.00, 0.10, 1.00, 25);
+		String root = ".";
+		root = args[0];
 		
-		String rootPath_EffectOfDifferentOh = "workspace-rtsj/effect-differentCostOfCacheOh";
+		String rootPath_EffectOfOhCost = root + "/workspace-rtsj/effect-costOfCacheOh/4.90";
+		varyCostOfOverhead(rootPath_EffectOfOhCost, 4.90, 0.00, 0.01, 0.10, 25);
+		
+		String rootPath_EffectOfDifferentOh = root + "/workspace-rtsj/effect-differentCostOfCacheOh-ohRatio(0,0.1)";
 		setDifferentCostOfOverheadForAllTasksets(rootPath_EffectOfDifferentOh, 0.10, 0.20, 5.00, 25);
+		
+		String rootPath_oneComponent = root + "/workspace-rtsj";
+		for(double util_max=24.00; util_max < 24.03; util_max+=0.01){
+	//		putTasksIntoOneComponnet(rootPath_oneComponent, 0.10, 0.20, util_max, 25);
+
+		}
 		
 	}
 	
@@ -174,6 +209,44 @@ public class SystemTransformer {
 			}
 			
 			str += "\t</component>\r\n";
+		}
+		str += "</system>\r\n";
+		
+		try{
+			
+			BufferedWriter output_xmlFile = new BufferedWriter(new FileWriter(outputFilename,false));
+			output_xmlFile.write(str);
+			output_xmlFile.flush();
+			Tool.debug(str);
+			output_xmlFile.close();
+		}catch (IOException e){
+			System.err.println("GenerateTaskset: open output_xmlFile fails. file name: " + outputFilename + "\r\n");
+			Tool.write2log("GenerateTaskset: open output_xmlFile fails. file name: " + outputFilename + "\r\n");
+		}
+	}
+	
+	public static void writeXML2OneComponent(String outputFilename, Component rootComponent){
+		String str = "";
+		
+		if(rootComponent == null){
+			System.err.println("not valid rootComponent Exit(1)!");
+			System.exit(1);
+		}
+		
+		str += "<system os_scheduler=\"gEDF\" period=\"" + rootComponentPeriod +  "\"> \r\n";
+		
+		for(int i=0; i<rootComponent.getChildComponents().size(); i++){
+			Component childComponent = rootComponent.getChildComponents().get(i);
+			//str += "\t<component name=\"C" + i + "\" scheduler=\"gEDF\" period=\""+df.format(childComponent.getdMPRInterface().getPi())+"\"> \r\n";
+			for(int j=0; j<childComponent.getTaskset().size(); j++){
+				Task task = childComponent.getTaskset().get(j);
+				
+				str+= "\t <task name=\"T" + task.getName() + "\" p=\"" + df.format(task.getPeriod()) + "\" d=\"" + df.format(task.getDeadline()) + 
+						"\" e=\"" + df.format(task.getExe()) + "\" " + "delta_rel=\"" + df.format(task.getDelta_rel()) + "\" delta_sch=\"" + df.format(task.getDelta_sch()) + 
+						"\" delta_cxs=\"" + df.format(task.getDelta_cxs()) + "\" delta_crpmd=\"" + df.format(task.getDelta_crpmd()) + "\" > </task>\r\n";
+			}
+			
+			//str += "\t</component>\r\n";
 		}
 		str += "</system>\r\n";
 		

@@ -2,6 +2,7 @@ package edu.penn.rtg.csa.mpr2;
 
 import java.util.*;
 
+
 import edu.penn.rtg.common.*;
 
 /**
@@ -195,7 +196,7 @@ public class Component {
 		
 		}while(true); //search m_prime_i
 		//The last feasibleInterface is the min bandwidth interface! 
-		if(feasibleInterface.getTheta() < 0){
+		if(feasibleInterface.getTheta() <= 0){
 			feasibleInterface.setTheta(GlobalVariable.MAX_INTEGER);
 		}
 		this.mPR2Interface = feasibleInterface;
@@ -699,7 +700,7 @@ public class Component {
 			Tool.write2Aklog("MPR2\t" + this.componentFilename + "\t Arvind_SchedTest/Meng_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! system exit. Not compute interface for this task set\r\n");
 			Tool.debug("MPR2\t" + this.componentFilename + "\t Arvind_SchedTest/Meng_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! system exit. Not compute interface for this task set\r\n");
 			System.err.println("MPR2\t" + this.componentFilename + "\t Arvind_SchedTest/Meng_SchedTest Ak_max(calculated)" + AkMax + " \t TOO LARGE! Computation is very slow.\r\n");
-			return GlobalVariable.InterfaceInfeasible;
+			
 			//System.exit(1);
 		}
 

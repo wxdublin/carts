@@ -333,7 +333,7 @@ public class SchedulableTasksetCounter {
 							}
 							if(bwSaveOrLost[bwSaveOrLostIndex] == GlobalVariable.BW_SAVE &&
 									bandwidth_TASKCENTRIC != -1 && bandwidth_COMBINED != -1){
-								if(bandwidth_COMBINED < bandwidth_TASKCENTRIC){/*when Combined approach is better*/
+								if(bandwidth_COMBINED <= bandwidth_TASKCENTRIC){/*when Combined approach is better*/
 									bandwidthTotalSavePerUtil += bandwidth_TASKCENTRIC - bandwidth_COMBINED;
 									numTasksetBandwidthSavePerUtil++;
 									bandwidthTotalSave += bandwidthTotalSavePerUtil;
