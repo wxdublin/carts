@@ -36,11 +36,12 @@ import javax.swing.text.DefaultStyledDocument;
 
 import java.util.StringTokenizer;
 import java.util.Vector;
-
 import java.util.Calendar;
 import java.util.Date;
-//import com.wildcrest.j2textprinter.*;
-import com.wildcrest.*;
+
+import com.wildcrest.j2textprinter.*;
+//import com.wildcrest.*;
+import com.wildcrest.j2textprinter.J2TextPrinter;
 import com.jpe.jpe;
 import com.jpe.Constants;
 
