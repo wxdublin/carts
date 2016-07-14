@@ -39,7 +39,8 @@ import java.util.Vector;
 
 import java.util.Calendar;
 import java.util.Date;
-import com.wildcrest.j2textprinter.*;
+//import com.wildcrest.j2textprinter.*;
+import com.wildcrest.*;
 import com.jpe.jpe;
 import com.jpe.Constants;
 
