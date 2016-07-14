@@ -1,0 +1,4 @@
+Please refer to the readme in edu.penn.rtg.csa.mpr2 for more detailed information.
+
+This package is only for Haoran's multi-mode paper. We take the number of VCPUs as an input and compute the component's interface.
+If the number of VCPUs is not enough to schedule the component's workload, we will output an invalid interface.  

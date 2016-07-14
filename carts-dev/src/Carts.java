@@ -1,10 +1,10 @@
 import com.jpe.*;
 
 import edu.penn.rtg.schedulingapp.CmdAnal;
-
 import edu.penn.rtg.csa.cadmpr.CADMPRAnalysis;
 import edu.penn.rtg.csa.dmpr.DMPRAnalysis;
 import edu.penn.rtg.csa.mpr2.MPR2Analysis;
+import edu.penn.rtg.csa.mpr24haoran.MPR24HaoRanAnalysis;
 
 public class Carts {
 	public static void main(String args[]) {
@@ -20,6 +20,12 @@ public class Carts {
 					|| args[1].toUpperCase().equals("MPR2_MENG") || args[1].toUpperCase().equals("MPR_MENG")){
 				MPR2Analysis.process(args);
 				System.out.println("Process  CSA with MPR2 model finished!");
+				return; 
+			} 
+			
+			if(args[1].toUpperCase().equals("MPR24HAORAN")){
+				MPR24HaoRanAnalysis.process(args);
+				System.out.println("Process  CSA with MPR24HaoRan model finished!");
 				return; 
 			} 
 			
