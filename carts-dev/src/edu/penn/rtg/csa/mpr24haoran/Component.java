@@ -108,10 +108,11 @@ public class Component {
 			
 		}
 		
-		int m_prime_min =m_prime_input;
+		int m_prime_min = m_prime_input;
 		int m_prime_max = m_prime_input; //same for gDM and gEDF
 		boolean is_interface_feasible = false;
-		int m_prime_i = this.getMin_m_prime() - 1;
+		//int m_prime_i = this.getMin_m_prime() - 1;
+		int m_prime_i = m_prime_input - 1; // We want m_prime_min to be set to m_prime_input in the first do-while loop
 		Tool.write2log("component "+this.componentName + ", \t m'_min=" + m_prime_min + ", \t m'_max=" + m_prime_max + "\r\n");
 		
 		MPR24HaoRan feasibleInterface = new MPR24HaoRan();
@@ -131,6 +132,7 @@ public class Component {
 				break;
 			}
 			m_prime_i = (m_prime_min + m_prime_max) / 2;
+			System.out.println("m_prime_min = " + m_prime_min + " m_prime_max=" + m_prime_max);
 			currentInterface.setM_prime(m_prime_i);
 		
 			
